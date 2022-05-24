@@ -3,7 +3,7 @@ terraform {
     hostname = "app.terraform.io"
     organization = "VargasArts"
     workspaces {
-      prefix = "parlaypartay.davidvargas.me"
+      prefix = "parlaypartaydavidvargasme"
     }
   }
   required_providers {
