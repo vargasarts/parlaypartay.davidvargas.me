@@ -1,41 +1,46 @@
 import fs from "fs";
 import axios from "axios";
+import dateParse from "date-fns/parse";
+import isBefore from "date-fns/isBefore";
 
 const searchEvents = ({ data }: { data: Record<string, string[]> }) => {
-  const cache = fs.existsSync(`public/data/cache.json`)
-    ? JSON.parse(fs.readFileSync(`public/data/cache.json`).toString())
-    : {};
-  const search = data["search"][0];
-  return cache[search]
-    ? Promise.resolve(cache[search] as { id: string; label: string }[])
-    : axios
-        .get<
-          {
-            away_team: string;
-            home_team: string;
-            id: string;
-            commence_time: string;
-          }[]
-        >(
-          `https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds/?regions=us&oddsFormat=american&apiKey=${process.env.ODDS_API_KEY}`
-        )
-        .then((r) => {
-          const events = r.data
-            .filter(
-              (e) =>
-                e.commence_time.startsWith("2022-09-11") ||
-                e.commence_time.startsWith("2022-09-12") ||
-                e.commence_time.startsWith("2022-09-09") ||
-                e.commence_time.startsWith("2022-09-13")
-            )
-            .map((e) => ({
-              label: `${e.away_team} @ ${e.home_team}`,
-              id: e.id,
-            }));
-          cache[search] = events;
-          fs.writeFileSync(`public/data/cache.json`, JSON.stringify(cache));
-          return events;
-        });
+  const sport = data["sport"][0];
+  const start = data["start"][0];
+  const end = data["end"][0];
+  const startDate = dateParse(start, "yyyy-MM-dd", new Date());
+  const endDate = dateParse(end, "yyyy-MM-dd", new Date());
+  return axios
+    .get<
+      {
+        away_team: string;
+        home_team: string;
+        id: string;
+        commence_time: string;
+      }[]
+    >(
+      `https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds/?regions=us&oddsFormat=american&apiKey=${process.env.ODDS_API_KEY}&sport=${sport}`
+    )
+    .then((r) => {
+      fs.writeFileSync(
+        "public/data/cache.json",
+        JSON.stringify({
+          data: r.data,
+          start,
+          end,
+          sport,
+        })
+      );
+      const events = r.data
+        .filter((d) => {
+          const date = new Date(d.commence_time);
+          return isBefore(date, endDate) && isBefore(startDate, date);
+        })
+        .map((e) => ({
+          label: `${e.away_team} @ ${e.home_team}`,
+          id: e.id,
+        }));
+      return events;
+    });
 };
 
 export default searchEvents;

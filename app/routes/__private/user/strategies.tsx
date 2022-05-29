@@ -4,7 +4,7 @@ export { default as ErrorBoundary } from "@dvargas92495/app/components/DefaultEr
 
 const Strategies = () => {
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full max-w-4xl">
       <Outlet />
     </div>
   );

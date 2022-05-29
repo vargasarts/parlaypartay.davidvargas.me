@@ -1,4 +1,3 @@
-import TextInput from "@dvargas92495/app/components/TextInput";
 import NumberInput from "@dvargas92495/app/components/NumberInput";
 import Select from "@dvargas92495/app/components/Select";
 import Button from "@dvargas92495/app/components/Button";
@@ -12,6 +11,31 @@ import { useEffect, useState } from "react";
 export { default as CatchBoundary } from "@dvargas92495/app/components/DefaultCatchBoundary";
 export { default as ErrorBoundary } from "@dvargas92495/app/components/DefaultErrorBoundary";
 import createParlay from "~/data/createStrategy.server";
+import BaseInput from "@dvargas92495/app/components/BaseInput";
+import dateFnsFormat from "date-fns/format";
+import addYears from "date-fns/addYears";
+
+const SPORTS = [
+  {
+    id: "americanfootball_nfl",
+    label: "NFL",
+  },
+  {
+    id: "baseball_mlb",
+    label: "MLB",
+  },
+  {
+    id: "basketball_nba",
+    label: "NBA",
+  },
+  {
+    id: "icehockey_nhl",
+    label: "NHL",
+  },
+];
+
+const now = new Date();
+const defaultEnd = addYears(now, 1);
 
 const NewParlayPage = () => {
   const data =
@@ -26,11 +50,24 @@ const NewParlayPage = () => {
   }, [fetcher.data]);
   return (
     <>
-      <fetcher.Form className="flex items-center" method="put">
-        <TextInput
-          name={"search"}
-          label={"Search"}
-          className={"flex-grow pr-8"}
+      <fetcher.Form className="flex items-center gap-4" method="put">
+        <Select
+          options={SPORTS}
+          label={"Sport"}
+          name={"sport"}
+          className={"w-24 mb-6"}
+        />
+        <BaseInput
+          label={"Start"}
+          name={"start"}
+          type={"date"}
+          defaultValue={dateFnsFormat(now, "yyyy-MM-dd")}
+        />
+        <BaseInput
+          label={"End"}
+          name={"end"}
+          type={"date"}
+          defaultValue={dateFnsFormat(defaultEnd, "yyyy-MM-dd")}
         />
         <Button>Add Games</Button>
       </fetcher.Form>
@@ -42,7 +79,7 @@ const NewParlayPage = () => {
               <span className="flex-grow">{evt.label}</span>
               <button
                 type="button"
-                className="p-4 bg-red-700 text-white cursor-pointer"
+                className="p-2 bg-red-700 text-white cursor-pointer"
                 onClick={() => setEvents(events.filter((e) => e.id !== evt.id))}
               >
                 X
