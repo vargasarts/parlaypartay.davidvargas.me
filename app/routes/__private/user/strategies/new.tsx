@@ -39,7 +39,7 @@ const defaultEnd = addYears(now, 1);
 
 const NewParlayPage = () => {
   const data =
-    useLoaderData<Awaited<ReturnType<typeof listAlgorithmsByUser>>>();
+    useLoaderData<Awaited<ReturnType<typeof listAlgorithmsByUser>>["data"]>();
   const fetcher = useFetcher<Awaited<ReturnType<typeof searchEvents>>>();
   const [events, setEvents] = useState<
     Awaited<ReturnType<typeof searchEvents>>
@@ -102,7 +102,9 @@ const NewParlayPage = () => {
 };
 
 export const loader: LoaderFunction = (args) => {
-  return remixAppLoader(args, listAlgorithmsByUser);
+  return remixAppLoader(args, ({ userId }) =>
+    listAlgorithmsByUser({ userId }).then(({ data }) => data)
+  );
 };
 
 export const action: ActionFunction = (args) => {
