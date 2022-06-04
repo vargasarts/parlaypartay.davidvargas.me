@@ -1,8 +1,10 @@
 import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
 import { v4 } from "uuid";
-import AWS from "aws-sdk";
+import uploadFile from "@dvargas92495/app/backend/uploadFile.server";
+import nodepath from "path";
+import fs from "fs";
 
-const createTemplate = ({
+const createAlgorithm = ({
   userId,
   data,
 }: {
@@ -13,21 +15,20 @@ const createTemplate = ({
   const logic = data.logic[0] || "";
   const uuid = v4();
   return getMysqlConnection()
-    .then(({ execute, destroy }) =>
-      execute(`INSERT INTO algorithms (uuid, label, user_id) VALUES (?,?,?)`, [
-        uuid,
-        label,
-        userId,
-      ]).then(() => destroy())
-    )
+    .then(({ execute, destroy }) => {
+      return execute(
+        `INSERT INTO algorithms (uuid, label, user_id) VALUES (?,?,?)`,
+        [uuid, label, userId]
+      ).then(() => destroy());
+    })
     .then(() => {
-      //   const s3 = new AWS.S3();
-      //   s3.upload({
-      //       Bucket: process.env.NODE_ENV
-      //   })
-      //
-      // aws-sdk-plus
-    });
+      console.log("upl");
+      const Key = `data/algorithms/${uuid}.js`;
+      const dir = nodepath.dirname(Key);
+      if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+      uploadFile({ Key: `data/algorithms/${uuid}.js`, Body: logic });
+    })
+    .then(() => uuid);
 };
 
-export default createTemplate;
+export default createAlgorithm;

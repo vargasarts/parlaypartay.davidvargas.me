@@ -20,7 +20,7 @@ const createStrategy = async ({ data }: { data: Record<string, string[]> }) => {
   }
 
   const algorithm = data["algorithm"][0];
-  const logic = getAlgorithmByUuid(algorithm);
+  const { logic } = await getAlgorithmByUuid(algorithm);
   let retries = 0;
   const existingParlays = new Set<number>();
   const results = Array(count)

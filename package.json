@@ -18,7 +18,7 @@
     "tailwind": "npm run generate:css -- --watch"
   },
   "dependencies": {
-    "@dvargas92495/app": "^0.4.0"
+    "@dvargas92495/app": "^0.6.2"
   },
   "devDependencies": {
     "@tailwindcss/forms": "^0.5.2",

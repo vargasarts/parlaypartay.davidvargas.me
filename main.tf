@@ -50,6 +50,10 @@ variable "stripe_webhook_secret" {
   type = string
 }
 
+variable "odds_api_key" {
+  type = string
+}
+
 provider "aws" {
   region = "us-east-1"
   access_key = var.aws_access_token
@@ -140,4 +144,10 @@ resource "github_actions_secret" "stripe_webhook_secret" {
   repository       = "parlaypartay.davidvargas.me"
   secret_name      = "STRIPE_WEBHOOK_SECRET"
   plaintext_value  = var.stripe_webhook_secret
+}
+
+resource "github_actions_secret" "odds_api_key" {
+  repository       = "parlaypartay.davidvargas.me"
+  secret_name      = "ODDS_API_KEY"
+  plaintext_value  = var.odds_api_key
 }
