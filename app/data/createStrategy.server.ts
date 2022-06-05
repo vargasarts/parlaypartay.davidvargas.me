@@ -1,10 +1,17 @@
 import { v4 } from "uuid";
-import fs from "fs";
 import getAlgorithmByUuid from "./getAlgorithmByUuid.server";
+import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
+import uploadFile from "@dvargas92495/app/backend/uploadFile.server";
 
 const MAX_RETRIES = 10000;
 
-const createStrategy = async ({ data }: { data: Record<string, string[]> }) => {
+const createStrategy = async ({
+  data,
+  userId,
+}: {
+  data: Record<string, string[]>;
+  userId: string;
+}) => {
   const count = Number(data["count"][0]);
   if (count < 1) {
     throw new Response(`Count must be at least 1. Found: ${count}`, {
@@ -20,6 +27,7 @@ const createStrategy = async ({ data }: { data: Record<string, string[]> }) => {
   }
 
   const algorithm = data["algorithm"][0];
+  const label = data["label"][0];
   const { logic } = await getAlgorithmByUuid(algorithm);
   let retries = 0;
   const existingParlays = new Set<number>();
@@ -52,8 +60,20 @@ const createStrategy = async ({ data }: { data: Record<string, string[]> }) => {
     results,
     events,
   };
-  fs.writeFileSync(`public/data/${uuid}.json`, JSON.stringify(output));
-  return Promise.resolve(uuid);
+  return getMysqlConnection()
+    .then(({ execute, destroy }) => {
+      return execute(
+        `INSERT INTO strategies (uuid, label, user_id) VALUES (?,?,?)`,
+        [uuid, label, userId]
+      ).then(() => destroy());
+    })
+    .then(() => {
+      uploadFile({
+        Key: `data/strategies/${uuid}.js`,
+        Body: JSON.stringify(output),
+      });
+    })
+    .then(() => uuid);
 };
 
 export default createStrategy;

@@ -1,4 +1,3 @@
-import fs from "fs";
 import axios from "axios";
 import dateParse from "date-fns/parse";
 import isBefore from "date-fns/isBefore";
@@ -21,15 +20,6 @@ const searchEvents = ({ data }: { data: Record<string, string[]> }) => {
       `https://api.the-odds-api.com/v4/sports/americanfootball_nfl/odds/?regions=us&oddsFormat=american&apiKey=${process.env.ODDS_API_KEY}&sport=${sport}`
     )
     .then((r) => {
-      fs.writeFileSync(
-        "public/data/cache.json",
-        JSON.stringify({
-          data: r.data,
-          start,
-          end,
-          sport,
-        })
-      );
       const events = r.data
         .filter((d) => {
           const date = new Date(d.commence_time);

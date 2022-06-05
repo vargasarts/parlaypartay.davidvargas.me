@@ -10,7 +10,7 @@ import searchEvents from "~/data/searchEvents.server";
 import { useEffect, useState } from "react";
 export { default as CatchBoundary } from "@dvargas92495/app/components/DefaultCatchBoundary";
 export { default as ErrorBoundary } from "@dvargas92495/app/components/DefaultErrorBoundary";
-import createParlay from "~/data/createStrategy.server";
+import createStrategy from "~/data/createStrategy.server";
 import BaseInput from "@dvargas92495/app/components/BaseInput";
 import dateFnsFormat from "date-fns/format";
 import addYears from "date-fns/addYears";
@@ -108,9 +108,9 @@ export const loader: LoaderFunction = (args) => {
 };
 
 export const action: ActionFunction = (args) => {
-  return remixAppAction(args, ({ method, data }) => {
+  return remixAppAction(args, ({ method, data, userId }) => {
     if (method === "POST")
-      return createParlay({ data }).then((uuid) =>
+      return createStrategy({ data, userId }).then((uuid) =>
         redirect(`/user/strategies/${uuid}`)
       );
     else if (method === "PUT") return searchEvents({ data });
