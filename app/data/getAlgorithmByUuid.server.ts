@@ -1,5 +1,5 @@
 import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
-import downloadFile from "@dvargas92495/app/backend/downloadFile.server";
+import { downloadFileContent } from "@dvargas92495/app/backend/downloadFile.server";
 
 const getAlgorithmByUuid = (uuid: string) => {
   return Promise.all([
@@ -11,8 +11,8 @@ const getAlgorithmByUuid = (uuid: string) => {
         }
       )
     ),
-    downloadFile({ Key: `data/algorithms/${uuid}.js` }),
-  ]).then(([label, logic]) => ({ label, logic: logic?.toString() || "" }));
+    downloadFileContent({ Key: `data/algorithms/${uuid}.js` }),
+  ]).then(([label, logic]) => ({ label, logic }));
 };
 
 export default getAlgorithmByUuid;
