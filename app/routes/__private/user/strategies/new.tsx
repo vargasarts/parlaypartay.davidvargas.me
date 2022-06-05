@@ -14,6 +14,7 @@ import createStrategy from "~/data/createStrategy.server";
 import BaseInput from "@dvargas92495/app/components/BaseInput";
 import dateFnsFormat from "date-fns/format";
 import addYears from "date-fns/addYears";
+import TextInput from "@dvargas92495/app/components/TextInput";
 
 const SPORTS = [
   {
@@ -87,14 +88,17 @@ const NewParlayPage = () => {
             </div>
           ))}
         </div>
-        <NumberInput
-          label="Count"
-          name="count"
-          placeholder="0"
-          max={Math.pow(2, events.length)}
-          min={1}
-        />
-        <Select label="Algorithm" name="algorithm" options={data} />
+        <div className="flex space-between">
+          <TextInput label="Label" name="label" placeholder="Enter label..." />
+          <NumberInput
+            label="Count"
+            name="count"
+            placeholder="0"
+            max={Math.pow(2, events.length)}
+            min={1}
+          />
+          <Select label="Algorithm" name="algorithm" options={data} />
+        </div>
         <Button>Generate</Button>
       </Form>
     </>
