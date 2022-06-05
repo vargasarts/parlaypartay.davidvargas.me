@@ -14,6 +14,7 @@ env:
   CLERK_API_KEY: ${{ secrets.CLERK_API_KEY }}
   DATABASE_URL: mysql://parlaypartay_davidvargas_me:${{ secrets.MYSQL_PASSWORD }}@vargas-arts.c2sjnb5f4d57.us-east-1.rds.amazonaws.com:5432/parlaypartay_davidvargas_me
   IS_PRODUCTION: 1
+  ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
   ORIGIN: https://parlaypartay.davidvargas.me
   STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
   STRIPE_WEBHOOK_SECRET: ${{ secrets.STRIPE_WEBHOOK_SECRET }}

@@ -18,6 +18,7 @@ env:
   DATABASE_URL: mysql://parlaypartay_davidvargas_me:${{ secrets.MYSQL_PASSWORD }}@vargas-arts.c2sjnb5f4d57.us-east-1.rds.amazonaws.com:5432/parlaypartay_davidvargas_me
   IS_PRODUCTION: 1
   ORIGIN: https://parlaypartay.davidvargas.me
+  ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
   STRIPE_PUBLIC_KEY: ${{ secrets.STRIPE_PUBLIC_KEY }}
   STRIPE_SECRET_KEY: ${{ secrets.STRIPE_SECRET_KEY }}
 
