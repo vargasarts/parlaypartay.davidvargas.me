@@ -1,14 +1,51 @@
-import { downloadFileContent } from "@dvargas92495/app/backend/downloadFile.server";
+import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
+import listAlgorithmsByUser from "./listAlgorithmsByUser.server";
 
-const getParlayByUuid = ({
+const getAlgorithmByUuid = ({
+  userId,
   params,
 }: {
+  userId: string;
   params: Record<string, string | undefined>;
 }) => {
   const uuid = params["uuid"] || "";
-  return downloadFileContent({ Key: `data/strategies/${uuid}.js` }).then(
-    (data) => JSON.parse(data) as { results: boolean[][]; events: string[] }
+  return getMysqlConnection().then(({ execute, destroy }) =>
+    Promise.all([
+      execute(`SELECT label FROM strategies WHERE uuid = ?`, [uuid]).then(
+        (records) => {
+          return (records as { label: string }[])[0]?.label;
+        }
+      ),
+      execute(
+        `SELECT e.uuid, p.label, p.value FROM events e INNER JOIN event_properties p ON p.event_uuid = e.uuid WHERE strategy_uuid = ?`,
+        [uuid]
+      ).then((records) => {
+        destroy();
+        return (
+          records as { label: string; uuid: string; value: string }[]
+        ).reduce((p, c) => {
+          if (p[c.uuid]) {
+            p[c.uuid][c.label] = c.value;
+          } else {
+            p[c.uuid] = { [c.label]: c.value };
+          }
+          return p;
+        }, {} as Record<string, Record<string, string>>);
+      }),
+      listAlgorithmsByUser({ userId }),
+    ]).then(([label, events, algorithms]) => {
+      destroy();
+      return {
+        label,
+        algorithms,
+        events: Object.entries(events).map(([uuid, rest]) => ({
+          uuid,
+          home: rest["home"],
+          away: rest["away"],
+        })),
+      };
+    })
   );
 };
 
-export default getParlayByUuid;
+export default getAlgorithmByUuid;

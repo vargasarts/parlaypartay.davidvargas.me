@@ -5,7 +5,7 @@ import uploadFile from "@dvargas92495/app/backend/uploadFile.server";
 
 const MAX_RETRIES = 10000;
 
-const createStrategy = async ({
+const createStrategyParlays = async ({
   data,
   userId,
 }: {
@@ -76,4 +76,4 @@ const createStrategy = async ({
     .then(() => uuid);
 };
 
-export default createStrategy;
+export default createStrategyParlays;
