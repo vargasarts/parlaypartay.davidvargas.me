@@ -21,17 +21,6 @@
     "@dvargas92495/app": "^0.8.17"
   },
   "devDependencies": {
-    "@types/uuid": "^8.3.4",
-    "@typescript-eslint/eslint-plugin": "^5.26.0",
-    "@typescript-eslint/parser": "^5.26.0",
-    "concurrently": "^7.2.1",
-    "eslint": "^8.16.0",
-    "fuegojs": "^0.29.2",
-    "prettier": "^2.6.2",
-    "tailwindcss": "^3.0.24",
-    "ts-node": "^10.8.0",
-    "tslint-config-prettier": "^1.18.0",
-    "tslint-react-hooks": "^2.2.2",
-    "typescript": "^4.6.4"
+    "fuegojs": "^0.30.5"
   }
 }
