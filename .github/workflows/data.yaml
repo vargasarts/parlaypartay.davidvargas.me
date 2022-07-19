@@ -28,4 +28,6 @@ jobs:
       - name: install
         run: npm install
       - name: migrate
+        run: npx fuego migrate --revert
+      - name: migrate
         run: npx fuego migrate
