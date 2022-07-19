@@ -7,7 +7,7 @@ export const migrate = (args: MigrationProps) => {
       .execute(`RENAME TABLE strategies TO gameplans`)
       .then(() =>
         cxn.execute(
-          `ALTER TABLE events RENAME COLUMN strategy_uuid TO gameplan_uuid`
+          `ALTER TABLE events CHANGE COLUMN strategy_uuid gameplan_uuid VARCHAR(36) NOT NULL`
         )
       )
   );
@@ -17,7 +17,7 @@ export const revert = (args: MigrationProps) => {
   return getMysqlConnection(args.connection).then((cxn) =>
     cxn
       .execute(
-        `ALTER TABLE events RENAME COLUMN gameplan_uuid TO strategy_uuid`
+        `ALTER TABLE events CHANGE COLUMN gameplan_uuid strategy_uuid VARCHAR(36) NOT NULL`
       )
       .then(() => cxn.execute(`RENAME TABLE gameplans TO strategies`))
   );
