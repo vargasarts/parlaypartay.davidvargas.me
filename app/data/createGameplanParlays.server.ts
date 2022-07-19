@@ -4,6 +4,19 @@ import { downloadFileContent } from "@dvargas92495/app/backend/downloadFile.serv
 
 const MAX_RETRIES = 10000;
 
+const getLogic = async (algorithm?: string) => {
+  try {
+    return algorithm
+      ? downloadFileContent({
+          Key: `data/algorithms/${algorithm}.js`,
+        }).catch(() => "return true")
+      : "return true";
+  } catch (e) {
+    console.error("Failed to get logic", e);
+    return "return true";
+  }
+};
+
 const createGameplanParlays = async ({
   data,
   userId,
@@ -52,11 +65,7 @@ const createGameplanParlays = async ({
   }
 
   console.log("inputs look good");
-  const logic = algorithm
-    ? await downloadFileContent({
-        Key: `data/algorithms/${algorithm}.js`,
-      }).catch(() => "return true")
-    : "return true";
+  const logic = await getLogic(algorithm);
   console.log("algo look good");
   let retries = 0;
   const existingParlays = new Set<number>();
