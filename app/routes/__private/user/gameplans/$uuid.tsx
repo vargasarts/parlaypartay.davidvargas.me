@@ -15,6 +15,7 @@ import TextInput from "@dvargas92495/app/components/TextInput";
 import createGameplanParlays from "~/data/createGameplanParlays.server";
 import deleteEvent from "~/data/deleteEvent.server";
 import getGameplanByUuid from "~/data/getGameplanByUuid.server";
+import { useState } from "react";
 
 const SPORTS = [
   {
@@ -40,6 +41,7 @@ const defaultEnd = addYears(now, 1);
 
 const EditGameplanPage = () => {
   const data = useLoaderData<Awaited<ReturnType<typeof getGameplanByUuid>>>();
+  const [customValues, setCustomValues] = useState<Record<string, string>>({});
   return (
     <>
       <Form className="flex items-center gap-4" method="put">
@@ -83,32 +85,48 @@ const EditGameplanPage = () => {
               <span className="flex-grow">
                 {evt["away"]} {"@"} {evt.home}
               </span>
-              <button className="py-2 px-4 bg-red-700 text-white cursor-pointer rounded-md text-sm" name={'uuid'} value={evt.uuid}>
-                X
-              </button>
+              <span className={"flex gap-2 items-center"}>
+                <NumberInput
+                  name={`custom-${evt.uuid}`}
+                  max={1}
+                  min={0}
+                  step={0.01}
+                  placeholder={"0.5"}
+                  className={"mb-0"}
+                  onChange={(e) =>
+                    setCustomValues({
+                      ...customValues,
+                      [`custom-${evt.uuid}`]: e.target.value,
+                    })
+                  }
+                />
+                <button
+                  className="py-2 px-4 bg-red-700 text-white cursor-pointer rounded-md text-sm"
+                  name={"uuid"}
+                  value={evt.uuid}
+                >
+                  X
+                </button>
+              </span>
             </Form>
           ))}
         </div>
-        <Form method="post">
-          <div className="flex space-between">
-            <TextInput
-              label="Label"
-              name="label"
-              placeholder="Enter label..."
-            />
-            <NumberInput
-              label="Count"
-              name="count"
-              placeholder="0"
-              max={Math.pow(2, (data.events || []).length)}
-              min={1}
-            />
-            <Select
-              label="Algorithm"
-              name="algorithm"
-              options={data.algorithms?.data}
-            />
-          </div>
+        <Form method={"post"} className="flex gap-8 w-full items-center">
+          {Object.entries(customValues).map((cv) => (
+            <input type={"hidden"} name={cv[0]} value={cv[1]} key={cv[0]} />
+          ))}
+          <Select
+            label="Algorithm"
+            name="algorithm"
+            options={data.algorithms?.data}
+          />
+          <NumberInput
+            label="Count"
+            name="count"
+            placeholder="0"
+            max={Math.pow(2, (data.events || []).length)}
+            min={1}
+          />
           <Button>Generate</Button>
         </Form>
       </div>
@@ -122,13 +140,23 @@ export const loader: LoaderFunction = (args) => {
 
 export const action: ActionFunction = (args) => {
   return remixAppAction(args, {
-    POST: ({ data, userId }) =>
-      createGameplanParlays({ data, userId }).then((uuid) =>
-        redirect(`/user/gameplans/${uuid}/parlays`)
+    POST: ({ data, userId, params }) =>
+      createGameplanParlays({ data, userId, params }).then(() =>
+        redirect(`/user/gameplans/${params["uuid"]}/parlays`)
       ),
     PUT: searchEvents,
     DELETE: deleteEvent,
   });
+};
+
+type GameplanData = Awaited<ReturnType<typeof getGameplanByUuid>>;
+
+const Title = (data: GameplanData) => {
+  return <>{data?.label}</>;
+};
+
+export const handle = {
+  Title,
 };
 
 export default EditGameplanPage;
