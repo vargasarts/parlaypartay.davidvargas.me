@@ -5,7 +5,7 @@ import uploadFile from "@dvargas92495/app/backend/uploadFile.server";
 
 const MAX_RETRIES = 10000;
 
-const createStrategyParlays = async ({
+const createGameplanParlays = async ({
   data,
   userId,
 }: {
@@ -63,17 +63,17 @@ const createStrategyParlays = async ({
   return getMysqlConnection()
     .then(({ execute, destroy }) => {
       return execute(
-        `INSERT INTO strategies (uuid, label, user_id) VALUES (?,?,?)`,
+        `INSERT INTO gameplans (uuid, label, user_id) VALUES (?,?,?)`,
         [uuid, label, userId]
       ).then(() => destroy());
     })
     .then(() => {
       uploadFile({
-        Key: `data/strategies/${uuid}.js`,
+        Key: `data/gameplans/${uuid}.json`,
         Body: JSON.stringify(output),
       });
     })
     .then(() => uuid);
 };
 
-export default createStrategyParlays;
+export default createGameplanParlays;

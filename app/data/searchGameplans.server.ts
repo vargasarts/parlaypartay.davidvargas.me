@@ -18,7 +18,7 @@ const searchRevenue = ({
         con
           .execute(
             `SELECT uuid, label
-          FROM strategies 
+          FROM gameplans 
           WHERE ${["user_id"]
             .concat(keys)
             .map((k) => `${k} = ?`)
@@ -36,7 +36,7 @@ const searchRevenue = ({
         con
           .execute(
             `SELECT COUNT(uuid) as count
-            FROM strategies 
+            FROM gameplans 
             WHERE user_id = ?`,
             [userId]
           )

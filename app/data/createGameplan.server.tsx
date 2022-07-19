@@ -1,7 +1,7 @@
 import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
 import { v4 } from "uuid";
 
-const createStrategy = ({
+const createGameplan = ({
   userId,
   data,
 }: {
@@ -13,11 +13,11 @@ const createStrategy = ({
   return getMysqlConnection()
     .then(({ execute, destroy }) => {
       return execute(
-        `INSERT INTO strategies (uuid, label, user_id) VALUES (?,?,?)`,
+        `INSERT INTO gameplans (uuid, label, user_id) VALUES (?,?,?)`,
         [uuid, label, userId]
       ).then(() => destroy());
     })
     .then(() => uuid);
 };
 
-export default createStrategy;
+export default createGameplan;

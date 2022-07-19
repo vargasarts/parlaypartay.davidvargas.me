@@ -12,7 +12,7 @@ const deleteEvent = ({
   return getMysqlConnection()
     .then(({ execute, destroy }) =>
       execute(
-        `SELECT s.user_id FROM events e INNER JOIN strategies s ON s.uuid = e.strategy_uuid WHERE e.uuid = ?`,
+        `SELECT s.user_id FROM events e INNER JOIN gameplans s ON s.uuid = e.gameplan_uuid WHERE e.uuid = ?`,
         [eventUuid]
       )
         .then((records) => {

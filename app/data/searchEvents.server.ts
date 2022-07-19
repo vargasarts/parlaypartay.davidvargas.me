@@ -8,16 +8,16 @@ import { idByLabel } from "~/enums/eventTypes";
 
 const createEvents = (
   events: { uuid: string; type: string; home: string; away: string }[],
-  strategyUuid: string
+  gameplanUuid: string
 ) => {
   console.log(events);
   return getMysqlConnection().then((cxn) =>
     cxn
       .execute(
-        `INSERT INTO events (uuid, type, strategy_uuid) VALUES ${events
+        `INSERT INTO events (uuid, type, gameplan_uuid) VALUES ${events
           .map(() => `(?,?,?)`)
           .join(",")}`,
-        events.flatMap((e) => [e.uuid, idByLabel[e.type], strategyUuid])
+        events.flatMap((e) => [e.uuid, idByLabel[e.type], gameplanUuid])
       )
       .then(() =>
         cxn.execute(
@@ -48,7 +48,7 @@ const searchEvents = ({
   params: Record<string, string | undefined>;
 }) => {
   const method = data["method"][0];
-  const strategyUuid = params["uuid"] || "";
+  const gameplanUuid = params["uuid"] || "";
   if (method === "search") {
     const sport = data["sport"][0];
     const start = data["start"][0];
@@ -78,13 +78,13 @@ const searchEvents = ({
             home: e.home_team,
             uuid: v4(),
           }));
-        return createEvents(events, strategyUuid).then(() => events);
+        return createEvents(events, gameplanUuid).then(() => events);
       });
   } else if (method === "create") {
     const home = data["home"][0];
     const away = data["away"][0];
     const events = [{ uuid: v4(), home, away, type: "Money Line" }];
-    return createEvents(events, strategyUuid).then(() => events);
+    return createEvents(events, gameplanUuid).then(() => events);
   }
   throw new BadRequestResponse(`Unknown method: ${method}`);
 };

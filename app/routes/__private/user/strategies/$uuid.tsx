@@ -12,9 +12,9 @@ import BaseInput from "@dvargas92495/app/components/BaseInput";
 import dateFnsFormat from "date-fns/format";
 import addYears from "date-fns/addYears";
 import TextInput from "@dvargas92495/app/components/TextInput";
-import createStrategyParlays from "~/data/createStrategyParlays.server";
+import createGameplanParlays from "~/data/createGameplanParlays.server";
 import deleteEvent from "~/data/deleteEvent.server";
-import getStrategyByUuid from "~/data/getStrategyByUuid.server";
+import getGameplanByUuid from "~/data/getGameplanByUuid.server";
 
 const SPORTS = [
   {
@@ -38,8 +38,8 @@ const SPORTS = [
 const now = new Date();
 const defaultEnd = addYears(now, 1);
 
-const EditStrategyPage = () => {
-  const data = useLoaderData<Awaited<ReturnType<typeof getStrategyByUuid>>>();
+const EditGameplanPage = () => {
+  const data = useLoaderData<Awaited<ReturnType<typeof getGameplanByUuid>>>();
   return (
     <>
       <Form className="flex items-center gap-4" method="put">
@@ -117,18 +117,18 @@ const EditStrategyPage = () => {
 };
 
 export const loader: LoaderFunction = (args) => {
-  return remixAppLoader(args, getStrategyByUuid);
+  return remixAppLoader(args, getGameplanByUuid);
 };
 
 export const action: ActionFunction = (args) => {
   return remixAppAction(args, {
     POST: ({ data, userId }) =>
-      createStrategyParlays({ data, userId }).then((uuid) =>
-        redirect(`/user/strategies/${uuid}/parlays`)
+      createGameplanParlays({ data, userId }).then((uuid) =>
+        redirect(`/user/gameplans/${uuid}/parlays`)
       ),
     PUT: searchEvents,
     DELETE: deleteEvent,
   });
 };
 
-export default EditStrategyPage;
+export default EditGameplanPage;

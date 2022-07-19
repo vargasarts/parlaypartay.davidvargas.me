@@ -1,11 +1,11 @@
 import remixAppLoader from "@dvargas92495/app/backend/remixAppLoader.server";
 import type { LoaderFunction } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
-import getParlayByUuid from "~/data/getStrategyParlaysByUuid.server";
+import getParlayByUuid from "~/data/getGameplanParlaysByUuid.server";
 export { default as CatchBoundary } from "@dvargas92495/app/components/DefaultCatchBoundary";
 export { default as ErrorBoundary } from "@dvargas92495/app/components/DefaultErrorBoundary";
 
-const SingleStrategyPage = () => {
+const SingleGameplanPage = () => {
   const data = useLoaderData<Awaited<ReturnType<typeof getParlayByUuid>>>();
   return (
     <>
@@ -27,4 +27,4 @@ export const loader: LoaderFunction = (args) => {
   return remixAppLoader(args, getParlayByUuid);
 };
 
-export default SingleStrategyPage;
+export default SingleGameplanPage;

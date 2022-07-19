@@ -3,15 +3,15 @@ import Table from "@dvargas92495/app/components/Table";
 import { Form, useNavigate } from "@remix-run/react";
 import { ActionFunction, LoaderFunction, redirect } from "@remix-run/node";
 import remixAppLoader from "@dvargas92495/app/backend/remixAppLoader.server";
-import searchStrategies from "~/data/searchStrategies.server";
-import createStrategy from "~/data/createStrategy.server";
+import searchGameplans from "~/data/searchGameplans.server";
+import createGameplan from "~/data/createGameplan.server";
 import remixAppAction from "@dvargas92495/app/backend/remixAppAction.server";
 import TextInput from "@dvargas92495/app/components/TextInput";
 
 export { default as CatchBoundary } from "@dvargas92495/app/components/DefaultCatchBoundary";
 export { default as ErrorBoundary } from "@dvargas92495/app/components/DefaultErrorBoundary";
 
-const StrategiesPage = () => {
+const GameplansPage = () => {
   const navigate = useNavigate();
   return (
     <>
@@ -25,14 +25,14 @@ const StrategiesPage = () => {
 };
 
 export const loader: LoaderFunction = (args) => {
-  return remixAppLoader(args, searchStrategies);
+  return remixAppLoader(args, searchGameplans);
 };
 
 export const action: ActionFunction = (args) => {
   return remixAppAction(args, {
     POST: (args) =>
-      createStrategy(args).then((uuid) => redirect(`/user/strategies/${uuid}`)),
+      createGameplan(args).then((uuid) => redirect(`/user/gameplans/${uuid}`)),
   });
 };
 
-export default StrategiesPage;
+export default GameplansPage;

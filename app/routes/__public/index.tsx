@@ -8,9 +8,9 @@ import subscribeToConvertkitAction from "@dvargas92495/app/backend/subscribeToCo
 const Home: React.FC = () => (
   <Landing>
     <Splash
-      title={"Turn your sports knowledge into profitable gambling strategies"}
+      title={"Turn your sports knowledge into profitable gambling gameplans"}
       subtitle={
-        "With Parlay Partay, you can create automated strategies so you know which teams to pick on game day."
+        "With Parlay Partay, you can create automated gameplans so you know which teams to pick on game day."
       }
       isWaitlist
     />

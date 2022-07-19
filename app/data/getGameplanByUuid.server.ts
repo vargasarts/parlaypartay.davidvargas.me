@@ -11,13 +11,13 @@ const getAlgorithmByUuid = ({
   const uuid = params["uuid"] || "";
   return getMysqlConnection().then(({ execute, destroy }) =>
     Promise.all([
-      execute(`SELECT label FROM strategies WHERE uuid = ?`, [uuid]).then(
+      execute(`SELECT label FROM gameplans WHERE uuid = ?`, [uuid]).then(
         (records) => {
           return (records as { label: string }[])[0]?.label;
         }
       ),
       execute(
-        `SELECT e.uuid, p.label, p.value FROM events e INNER JOIN event_properties p ON p.event_uuid = e.uuid WHERE strategy_uuid = ?`,
+        `SELECT e.uuid, p.label, p.value FROM events e INNER JOIN event_properties p ON p.event_uuid = e.uuid WHERE gameplan_uuid = ?`,
         [uuid]
       ).then((records) => {
         destroy();

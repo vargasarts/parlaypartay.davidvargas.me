@@ -2,7 +2,7 @@
 
 Accessible at [https://parlaypartay.davidvargas.me](https://parlaypartay.davidvargas.me). 
 
-A platform for creating a sports gambling guild to develop and share strategies.
+A platform for creating a sports gambling guild to develop and share gameplans of parlays.
 
 ## Setup
 
