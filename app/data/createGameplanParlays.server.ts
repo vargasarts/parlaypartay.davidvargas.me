@@ -1,6 +1,6 @@
 import { v4 } from "uuid";
-import getAlgorithmByUuid from "./getAlgorithmByUuid.server";
 import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
+import { downloadFileContent } from "@dvargas92495/app/backend/downloadFile.server";
 
 const MAX_RETRIES = 10000;
 
@@ -52,9 +52,12 @@ const createGameplanParlays = async ({
   }
 
   console.log("inputs look good");
-  const { logic } = algorithm
-    ? await getAlgorithmByUuid(algorithm, cxn.execute)
-    : { logic: "return true" };
+  const logic = algorithm
+    ? await downloadFileContent({
+        Key: `data/algorithms/${algorithm}.js`,
+      }).catch(() => "return true")
+    : "return true";
+  console.log("algo look good");
   let retries = 0;
   const existingParlays = new Set<number>();
   const results = Array(count)
