@@ -5,7 +5,7 @@ import { downloadFileContent } from "@dvargas92495/app/backend/downloadFile.serv
 
 const getAlgorithmByUuid = (uuid: string, execute?: Execute) => {
   return Promise.all([
-    execute
+    (execute
       ? execute(`SELECT label FROM algorithms WHERE uuid = ?`, [uuid]).then(
           (records) => {
             return (records as { label: string }[])[0]?.label;
@@ -18,9 +18,19 @@ const getAlgorithmByUuid = (uuid: string, execute?: Execute) => {
               return (records as { label: string }[])[0]?.label;
             }
           )
-        ),
-    downloadFileContent({ Key: `data/algorithms/${uuid}.js` }),
-  ]).then(([label, logic]) => ({ label, logic }));
+        )
+    ).catch((e) =>
+      Promise.reject(`Failed to retrieve label from algorithm: ${e.message}`)
+    ),
+    downloadFileContent({ Key: `data/algorithms/${uuid}.js` }).catch((e) =>
+      Promise.reject(`Failed to retrieve algorithm content: ${e.message}`)
+    ),
+  ])
+    .then(([label, logic]) => ({ label, logic }))
+    .catch((e) => {
+      console.error(e);
+      return { label: "Unknown Error", logic: "return true" };
+    });
 };
 
 export default getAlgorithmByUuid;
