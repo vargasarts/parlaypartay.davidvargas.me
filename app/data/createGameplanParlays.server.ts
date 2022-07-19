@@ -1,15 +1,34 @@
 import { v4 } from "uuid";
 import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
-import { downloadFileContent } from "@dvargas92495/app/backend/downloadFile.server";
+import downloadFile from "@dvargas92495/app/backend/downloadFile.server";
 
 const MAX_RETRIES = 10000;
 
 const getLogic = async (algorithm?: string) => {
   try {
     return algorithm
-      ? downloadFileContent({
+      ? downloadFile({
           Key: `data/algorithms/${algorithm}.js`,
-        }).catch(() => "return true")
+        })
+          .then((fil) => {
+            const chunks: Buffer[] = [];
+            console.log("downloaded file");
+            return new Promise<string>((resolve, reject) => {
+              fil.on("data", (chunk) => {
+                console.log("push chunk");
+                chunks.push(Buffer.from(chunk));
+              });
+              fil.on("error", (err) => {
+                console.log("something bad:", err);
+                reject(err);
+              });
+              fil.on("end", () => {
+                console.log("resolve end");
+                resolve(Buffer.concat(chunks).toString("utf8"));
+              });
+            });
+          })
+          .catch(() => "return true")
       : "return true";
   } catch (e) {
     console.error("Failed to get logic", e);
