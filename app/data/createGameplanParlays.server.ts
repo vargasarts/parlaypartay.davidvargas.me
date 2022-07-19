@@ -50,7 +50,7 @@ const createGameplanParlays = async ({
   }
 
   const { logic } = algorithm
-    ? await getAlgorithmByUuid(algorithm)
+    ? await getAlgorithmByUuid(algorithm, cxn.execute)
     : { logic: "return true" };
   let retries = 0;
   const existingParlays = new Set<number>();

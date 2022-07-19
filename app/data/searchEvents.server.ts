@@ -10,7 +10,6 @@ const createEvents = (
   events: { uuid: string; type: string; home: string; away: string }[],
   gameplanUuid: string
 ) => {
-  console.log(events);
   return getMysqlConnection().then((cxn) =>
     cxn
       .execute(
