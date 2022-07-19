@@ -13,6 +13,7 @@ const createGameplanParlays = async ({
   data: Record<string, string[]>;
   userId: string;
 }) => {
+  console.log("entered create gameplan parlays");
   const count = Number(data["count"][0]);
   const algorithm = data["algorithm"]?.[0];
   const uuid = params["uuid"] || "";
@@ -28,6 +29,7 @@ const createGameplanParlays = async ({
       status: 400,
     });
   }
+  console.log("about to open connections");
   const cxn = await getMysqlConnection();
   const owner = await cxn
     .execute("select user_id from gameplans where uuid = ?", [uuid])
@@ -49,6 +51,7 @@ const createGameplanParlays = async ({
     });
   }
 
+  console.log("inputs look good");
   const { logic } = algorithm
     ? await getAlgorithmByUuid(algorithm, cxn.execute)
     : { logic: "return true" };
@@ -90,12 +93,15 @@ const createGameplanParlays = async ({
       outcome,
     })),
   }));
+  console.log("weve built the results");
   await cxn.execute(
     `INSERT INTO parlays (uuid, attempt, gameplan_uuid) VALUES ${parlays
       .map(() => `(?,?,?)`)
       .join(",")}`,
     parlays.flatMap((p) => [p.uuid, p.attempt, uuid])
   );
+
+  console.log("insert1");
   await cxn.execute(
     `INSERT INTO parlay_results (uuid, event_uuid, parlay_uuid, outcome) VALUES ${parlays
       .flatMap((p) => p.results.map(() => `(?,?,?,?)`))
@@ -104,7 +110,11 @@ const createGameplanParlays = async ({
       p.results.flatMap((r) => [r.uuid, r.eventUuid, p.uuid, Number(r.outcome)])
     )
   );
+
+  console.log("insert 2");
   cxn.destroy();
+
+  console.log("success");
   return { success: true };
 };
 
