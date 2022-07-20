@@ -6,7 +6,7 @@ const MAX_RETRIES = 10000;
 
 const getLogic = async (algorithm?: string) => {
   try {
-    return algorithm
+    return algorithm && algorithm.startsWith("SKIP ACTUAL DOWNLOADING FILES FOR NOW")
       ? downloadFile({
           Key: `data/algorithms/${algorithm}.js`,
         })
