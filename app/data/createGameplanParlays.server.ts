@@ -12,23 +12,30 @@ const getLogic = async (algorithm?: string) => {
         })
           .then((fil) => {
             const chunks: Buffer[] = [];
-            console.log("downloaded file");
+            console.log("downloaded file", fil instanceof ReadableStream);
             return new Promise<string>((resolve, reject) => {
-              fil.on("data", (chunk) => {
-                console.log("push chunk");
-                chunks.push(Buffer.from(chunk));
-              });
-              fil.on("error", (err) => {
-                console.log("something bad:", err);
-                reject(err);
-              });
-              fil.on("end", () => {
-                console.log("resolve end");
-                resolve(Buffer.concat(chunks).toString("utf8"));
-              });
+              try {
+                fil.on("data", (chunk) => {
+                  console.log("push chunk");
+                  chunks.push(Buffer.from(chunk));
+                });
+                fil.on("error", (err) => {
+                  console.log("something bad:", err);
+                  reject(err);
+                });
+                fil.on("end", () => {
+                  console.log("resolve end");
+                  resolve(Buffer.concat(chunks).toString("utf8"));
+                });
+              } catch (e) {
+                reject(`Failed to read stream: ${(e as Error)?.message}`);
+              }
             });
           })
-          .catch(() => "return true")
+          .catch((e) => {
+            console.log(e);
+            return "return true";
+          })
       : "return true";
   } catch (e) {
     console.error("Failed to get logic", e);
@@ -45,7 +52,6 @@ const createGameplanParlays = async ({
   data: Record<string, string[]>;
   userId: string;
 }) => {
-  console.log("entered create gameplan parlays");
   const count = Number(data["count"][0]);
   const algorithm = data["algorithm"]?.[0];
   const uuid = params["uuid"] || "";
@@ -61,7 +67,6 @@ const createGameplanParlays = async ({
       status: 400,
     });
   }
-  console.log("about to open connections");
   const cxn = await getMysqlConnection();
   const owner = await cxn
     .execute("select user_id from gameplans where uuid = ?", [uuid])
