@@ -41,6 +41,20 @@ const getGameplanParlaysByUuid = async ({
           value: string;
         }[]
     );
+  const title = await cxn
+    .execute(
+      `SELECT g.label from gameplans g
+      WHERE g.uuid = ?`,
+      [uuid]
+    )
+    .then(
+      ([p]) =>
+        (
+          p as {
+            title: string;
+          }[]
+        )[0]?.title
+    );
   cxn.destroy();
   const grouped = parlays.reduce((p, c) => {
     if (p[c.uuid]) {
@@ -93,6 +107,7 @@ const getGameplanParlaysByUuid = async ({
       { Header: "Left", accessor: "left" },
     ],
     events: groupedEvents,
+    title,
   };
 };
 
