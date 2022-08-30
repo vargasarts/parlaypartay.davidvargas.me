@@ -13,11 +13,11 @@ const createGameplan = ({
   const label = data.label[0] || "";
   const uuid = v4();
   return getMysqlConnection(requestId)
-    .then(({ execute, destroy }) => {
-      return execute(
+    .then((cxn) => {
+      return cxn.execute(
         `INSERT INTO gameplans (uuid, label, user_id) VALUES (?,?,?)`,
         [uuid, label, userId]
-      ).then(() => destroy());
+      ).then(() => cxn.destroy());
     })
     .then(() => uuid);
 };

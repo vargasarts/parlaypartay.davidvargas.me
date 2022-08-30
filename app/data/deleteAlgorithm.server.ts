@@ -14,8 +14,8 @@ const deleteAlgorithm = ({
 }) => {
   const uuid = params["uuid"] || "";
   return getMysqlConnection(requestId)
-    .then(({ execute, destroy }) =>
-      execute(`SELECT user_id FROM algorithms WHERE uuid = ?`, [uuid])
+    .then((cxn) =>
+      cxn.execute(`SELECT user_id FROM algorithms WHERE uuid = ?`, [uuid])
         .then(([records]) => {
           return (records as { user_id: string }[])[0]?.user_id;
         })
@@ -31,9 +31,9 @@ const deleteAlgorithm = ({
             : Promise.resolve()
           )
             .then(() =>
-              execute(`DELETE FROM algorithms WHERE uuid = ?`, [uuid])
+              cxn.execute(`DELETE FROM algorithms WHERE uuid = ?`, [uuid])
             )
-            .then(() => destroy());
+            .then(() => cxn.destroy());
         })
     )
     .then(() => ({ success: true }));

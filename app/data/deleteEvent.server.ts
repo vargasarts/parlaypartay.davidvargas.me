@@ -12,8 +12,8 @@ const deleteEvent = ({
 }) => {
   const eventUuid = data["uuid"]?.[0] || "";
   return getMysqlConnection(requestId)
-    .then(({ execute, destroy }) =>
-      execute(
+    .then((cxn) =>
+      cxn.execute(
         `SELECT s.user_id FROM events e INNER JOIN gameplans s ON s.uuid = e.gameplan_uuid WHERE e.uuid = ?`,
         [eventUuid]
       )
@@ -27,13 +27,13 @@ const deleteEvent = ({
             );
           }
 
-          return execute(`DELETE FROM event_properties WHERE event_uuid = ?`, [
+          return cxn.execute(`DELETE FROM event_properties WHERE event_uuid = ?`, [
             eventUuid,
           ])
             .then(() =>
-              execute(`DELETE FROM events WHERE uuid = ?`, [eventUuid])
+              cxn.execute(`DELETE FROM events WHERE uuid = ?`, [eventUuid])
             )
-            .then(() => destroy());
+            .then(() => cxn.destroy());
         })
     )
     .then(() => ({

@@ -15,11 +15,11 @@ const createAlgorithm = ({
   const logic = data.logic[0] || "";
   const uuid = v4();
   return getMysqlConnection(requestId)
-    .then(({ execute, destroy }) => {
-      return execute(
+    .then((cxn) => {
+      return cxn.execute(
         `INSERT INTO algorithms (uuid, label, user_id) VALUES (?,?,?)`,
         [uuid, label, userId]
-      ).then(() => destroy());
+      ).then(() => cxn.destroy());
     })
     .then(() => {
       uploadFile({ Key: `data/algorithms/${uuid}.js`, Body: logic });

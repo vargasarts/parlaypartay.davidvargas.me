@@ -4,10 +4,10 @@ import { downloadFileContent } from "@dvargas92495/app/backend/downloadFile.serv
 const getAlgorithmByUuid = (uuid: string, requestId: string) => {
   return Promise.all([
     getMysqlConnection(requestId)
-      .then(({ execute, destroy }) =>
-        execute(`SELECT label FROM algorithms WHERE uuid = ?`, [uuid]).then(
+      .then((cxn) =>
+        cxn.execute(`SELECT label FROM algorithms WHERE uuid = ?`, [uuid]).then(
           ([records]) => {
-            destroy();
+            cxn.destroy();
             return (records as { label: string }[])[0]?.label;
           }
         )

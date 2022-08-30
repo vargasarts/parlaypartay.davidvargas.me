@@ -16,10 +16,10 @@ const updateAlgorithm = ({
   const logic = data.logic[0] || "";
   const uuid = params["uuid"] || "";
   return getMysqlConnection(requestId)
-    .then(({ execute, destroy }) =>
-      execute(`SELECT user_id FROM algorithms WHERE uuid = ?`, [uuid]).then(
+    .then((cxn) =>
+      cxn.execute(`SELECT user_id FROM algorithms WHERE uuid = ?`, [uuid]).then(
         ([records]) => {
-          destroy();
+          cxn.destroy();
           return (records as { user_id: string }[])[0]?.user_id;
         }
       )

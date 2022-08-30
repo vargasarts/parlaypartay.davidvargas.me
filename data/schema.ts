@@ -3,7 +3,7 @@ import { z } from "zod";
 const algorithm = z.object({
   uuid: z.string().uuid().describe("primary"),
   label: z.string().max(64).describe("unique"),
-  userId: z.string().max(32),
+  userId: z.string().max(32).describe("unique"),
 });
 
 const eventProperty = z.object({
@@ -17,13 +17,13 @@ const event = z.object({
   uuid: z.string().uuid().describe("primary"),
   type: z.number().max(Math.pow(2, 8)),
   gameplanUuid: z.string().uuid().describe("foreign"),
-  outcome: z.boolean(),
+  outcome: z.boolean().optional(),
 });
 
 const gameplan = z.object({
   uuid: z.string().uuid().describe("primary"),
   label: z.string().max(64).describe("unique"),
-  userId: z.string().max(32),
+  userId: z.string().max(32).describe("unique"),
 });
 
 const parlayResult = z.object({
