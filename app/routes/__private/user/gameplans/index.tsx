@@ -15,7 +15,7 @@ const GameplansPage = () => {
   const navigate = useNavigate();
   return (
     <>
-      <Table className="flex-grow" onRowClick={(row) => navigate(row.uuid)} />
+      <Table className="flex-grow" onRowClick={(row) => navigate(row.uuid as string)} />
       <Form method={"post"}>
         <TextInput name="label" label={"Label"} />
         <Button>+ New</Button>

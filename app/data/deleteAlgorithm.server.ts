@@ -6,15 +6,17 @@ import fs from "fs";
 const deleteAlgorithm = ({
   userId,
   params,
+  context: { requestId },
 }: {
+  context: { requestId: string };
   userId: string;
   params: Record<string, string | undefined>;
 }) => {
   const uuid = params["uuid"] || "";
-  return getMysqlConnection()
+  return getMysqlConnection(requestId)
     .then(({ execute, destroy }) =>
       execute(`SELECT user_id FROM algorithms WHERE uuid = ?`, [uuid])
-        .then((records) => {
+        .then(([records]) => {
           return (records as { user_id: string }[])[0]?.user_id;
         })
         .then((user_id) => {

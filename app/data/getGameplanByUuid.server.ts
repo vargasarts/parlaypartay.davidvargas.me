@@ -1,26 +1,27 @@
 import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
-import listAlgorithmsByUser from "./listAlgorithmsByUser.server";
+import { listAlgorithmsByUserQuery } from "./listAlgorithmsByUser.server";
 
 const getAlgorithmByUuid = ({
   userId,
   params,
+  context: { requestId },
 }: {
+  context: { requestId: string };
   userId: string;
   params: Record<string, string | undefined>;
 }) => {
   const uuid = params["uuid"] || "";
-  return getMysqlConnection().then(({ execute, destroy }) =>
+  return getMysqlConnection(requestId).then((cxn) =>
     Promise.all([
-      execute(`SELECT label FROM gameplans WHERE uuid = ?`, [uuid]).then(
-        (records) => {
+      cxn.execute(`SELECT label FROM gameplans WHERE uuid = ?`, [uuid]).then(
+        ([records]) => {
           return (records as { label: string }[])[0]?.label;
         }
       ),
-      execute(
+      cxn.execute(
         `SELECT e.uuid, p.label, p.value FROM events e INNER JOIN event_properties p ON p.event_uuid = e.uuid WHERE gameplan_uuid = ?`,
         [uuid]
-      ).then((records) => {
-        destroy();
+      ).then(([records]) => {
         return (
           records as { label: string; uuid: string; value: string }[]
         ).reduce((p, c) => {
@@ -32,9 +33,9 @@ const getAlgorithmByUuid = ({
           return p;
         }, {} as Record<string, Record<string, string>>);
       }),
-      listAlgorithmsByUser({ userId }),
+      listAlgorithmsByUserQuery(cxn, userId),
     ]).then(([label, events, algorithms]) => {
-      destroy();
+      cxn.destroy();
       return {
         label,
         algorithms,

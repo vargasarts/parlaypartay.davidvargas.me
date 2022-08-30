@@ -1,41 +1,15 @@
 import { v4 } from "uuid";
 import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
-import downloadFile from "@dvargas92495/app/backend/downloadFile.server";
+import { downloadFileContent } from "@dvargas92495/app/backend/downloadFile.server";
 
 const MAX_RETRIES = 10000;
 
 const getLogic = async (algorithm?: string) => {
   try {
-    return algorithm && algorithm.startsWith("SKIP ACTUAL DOWNLOADING FILES FOR NOW")
-      ? downloadFile({
+    return algorithm
+      ? downloadFileContent({
           Key: `data/algorithms/${algorithm}.js`,
         })
-          .then((fil) => {
-            const chunks: Buffer[] = [];
-            console.log("downloaded file", fil instanceof ReadableStream);
-            return new Promise<string>((resolve, reject) => {
-              try {
-                fil.on("data", (chunk) => {
-                  console.log("push chunk");
-                  chunks.push(Buffer.from(chunk));
-                });
-                fil.on("error", (err) => {
-                  console.log("something bad:", err);
-                  reject(err);
-                });
-                fil.on("end", () => {
-                  console.log("resolve end");
-                  resolve(Buffer.concat(chunks).toString("utf8"));
-                });
-              } catch (e) {
-                reject(`Failed to read stream: ${(e as Error)?.message}`);
-              }
-            });
-          })
-          .catch((e) => {
-            console.log(e);
-            return "return true";
-          })
       : "return true";
   } catch (e) {
     console.error("Failed to get logic", e);
@@ -47,7 +21,9 @@ const createGameplanParlays = async ({
   data,
   userId,
   params,
+  context: { requestId },
 }: {
+  context: { requestId: string };
   params: Record<string, string | undefined>;
   data: Record<string, string[]>;
   userId: string;
@@ -67,13 +43,13 @@ const createGameplanParlays = async ({
       status: 400,
     });
   }
-  const cxn = await getMysqlConnection();
+  const cxn = await getMysqlConnection(requestId);
   const owner = await cxn
     .execute("select user_id from gameplans where uuid = ?", [uuid])
-    .then((a) => (a as { user_id: string }[])?.[0]?.user_id);
+    .then(([a]) => (a as { user_id: string }[])?.[0]?.user_id);
   const events = await cxn
     .execute("select uuid from events where gameplan_uuid = ?", [uuid])
-    .then((a) => (a as { uuid: string }[]).map((a) => a.uuid));
+    .then(([a]) => (a as { uuid: string }[]).map((a) => a.uuid));
   const max = Math.pow(2, events.length);
   if (count > max) {
     cxn.destroy();
@@ -88,14 +64,12 @@ const createGameplanParlays = async ({
     });
   }
 
-  console.log("inputs look good");
   const logic = await getLogic(algorithm);
-  console.log("algo look good");
   let retries = 0;
   const existingParlays = new Set<number>();
   const results = Array(count)
     .fill(null)
-    .map((_) => {
+    .map(() => {
       while (retries < MAX_RETRIES) {
         const outcomes = events.map((evt) => {
           if (customWeightsByEventUuid[evt])
@@ -129,7 +103,6 @@ const createGameplanParlays = async ({
       outcome,
     })),
   }));
-  console.log("weve built the results");
   await cxn.execute(
     `INSERT INTO parlays (uuid, attempt, gameplan_uuid) VALUES ${parlays
       .map(() => `(?,?,?)`)
@@ -137,7 +110,6 @@ const createGameplanParlays = async ({
     parlays.flatMap((p) => [p.uuid, p.attempt, uuid])
   );
 
-  console.log("insert1");
   await cxn.execute(
     `INSERT INTO parlay_results (uuid, event_uuid, parlay_uuid, outcome) VALUES ${parlays
       .flatMap((p) => p.results.map(() => `(?,?,?,?)`))
@@ -147,10 +119,8 @@ const createGameplanParlays = async ({
     )
   );
 
-  console.log("insert 2");
   cxn.destroy();
 
-  console.log("success");
   return { success: true };
 };
 

@@ -6,17 +6,19 @@ const updateAlgorithm = ({
   userId,
   data,
   params,
+  context: { requestId },
 }: {
+  context: { requestId: string };
   userId: string;
   data: Record<string, string[]>;
   params: Record<string, string | undefined>;
 }) => {
   const logic = data.logic[0] || "";
   const uuid = params["uuid"] || "";
-  return getMysqlConnection()
+  return getMysqlConnection(requestId)
     .then(({ execute, destroy }) =>
       execute(`SELECT user_id FROM algorithms WHERE uuid = ?`, [uuid]).then(
-        (records) => {
+        ([records]) => {
           destroy();
           return (records as { user_id: string }[])[0]?.user_id;
         }

@@ -24,7 +24,7 @@ const NewAlgorithmPage = () => {
           name={"logic"}
           label={"Logic"}
           defaultValue={`return Math.random() < 0.5`}
-          className={'font-mono'}
+          className={"font-mono"}
         />
       </div>
       <Button>Create</Button>
@@ -33,8 +33,8 @@ const NewAlgorithmPage = () => {
 };
 
 export const action: ActionFunction = (args) => {
-  return remixAppAction(args, ({ userId, data }) =>
-    createAlgorithm({ userId, data }).then((uuid) =>
+  return remixAppAction(args, ({ userId, data, context: { requestId } }) =>
+    createAlgorithm({ userId, data, requestId }).then((uuid) =>
       redirect(`/user/algorithms/${uuid}`)
     )
   );

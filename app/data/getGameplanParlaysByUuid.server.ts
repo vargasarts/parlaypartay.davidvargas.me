@@ -2,11 +2,13 @@ import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
 
 const getGameplanParlaysByUuid = async ({
   params,
+  context: { requestId },
 }: {
+  context: { requestId: string };
   params: Record<string, string | undefined>;
 }) => {
   const uuid = params["uuid"] || "";
-  const cxn = await getMysqlConnection();
+  const cxn = await getMysqlConnection(requestId);
   const parlays = await cxn
     .execute(
       `SELECT p.uuid, p.attempt, r.outcome, r.event_uuid from parlays p 
@@ -15,7 +17,7 @@ const getGameplanParlaysByUuid = async ({
       [uuid]
     )
     .then(
-      (p) =>
+      ([p]) =>
         p as {
           uuid: string;
           outcome: 0 | 1;
@@ -31,7 +33,7 @@ const getGameplanParlaysByUuid = async ({
       [uuid]
     )
     .then(
-      (p) =>
+      ([p]) =>
         p as {
           uuid: string;
           outcome: 0 | 1 | null;
@@ -61,7 +63,7 @@ const getGameplanParlaysByUuid = async ({
       };
     }
     return p;
-  }, {} as Record<string, { properties: Record<string, string>; outcome: boolean |undefined}>);
+  }, {} as Record<string, { properties: Record<string, string>; outcome: boolean | undefined }>);
   const eventOutcomes = Object.fromEntries(
     events.map((e) => [e.uuid, e.outcome])
   );

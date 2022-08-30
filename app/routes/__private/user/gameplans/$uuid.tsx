@@ -39,8 +39,9 @@ const SPORTS = [
 const now = new Date();
 const defaultEnd = addYears(now, 1);
 
+type GameplanData = Awaited<ReturnType<typeof getGameplanByUuid>>;
 const EditGameplanPage = () => {
-  const data = useLoaderData<Awaited<ReturnType<typeof getGameplanByUuid>>>();
+  const data = useLoaderData<GameplanData>();
   const [customValues, setCustomValues] = useState<Record<string, string>>({});
   return (
     <>
@@ -140,16 +141,14 @@ export const loader: LoaderFunction = (args) => {
 
 export const action: ActionFunction = (args) => {
   return remixAppAction(args, {
-    POST: ({ data, userId, params }) =>
-      createGameplanParlays({ data, userId, params }).then(() =>
-        redirect(`/user/gameplans/${params["uuid"]}/parlays`)
+    POST: (args) =>
+      createGameplanParlays(args).then(() =>
+        redirect(`/user/gameplans/${args.params["uuid"]}/parlays`)
       ),
     PUT: searchEvents,
     DELETE: deleteEvent,
   });
 };
-
-type GameplanData = Awaited<ReturnType<typeof getGameplanByUuid>>;
 
 const Title = (data: GameplanData) => {
   return <>{data?.label}</>;

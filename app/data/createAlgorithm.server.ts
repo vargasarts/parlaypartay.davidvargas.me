@@ -5,14 +5,16 @@ import uploadFile from "@dvargas92495/app/backend/uploadFile.server";
 const createAlgorithm = ({
   userId,
   data,
+  requestId,
 }: {
   userId: string;
   data: Record<string, string[]>;
+  requestId: string;
 }) => {
   const label = data.label[0] || "";
   const logic = data.logic[0] || "";
   const uuid = v4();
-  return getMysqlConnection()
+  return getMysqlConnection(requestId)
     .then(({ execute, destroy }) => {
       return execute(
         `INSERT INTO algorithms (uuid, label, user_id) VALUES (?,?,?)`,

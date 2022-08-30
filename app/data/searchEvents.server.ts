@@ -8,9 +8,10 @@ import { idByLabel } from "~/enums/eventTypes";
 
 const createEvents = (
   events: { uuid: string; type: string; home: string; away: string }[],
-  gameplanUuid: string
+  gameplanUuid: string,
+  requestId: string,
 ) => {
-  return getMysqlConnection().then((cxn) =>
+  return getMysqlConnection(requestId).then((cxn) =>
     cxn
       .execute(
         `INSERT INTO events (uuid, type, gameplan_uuid) VALUES ${events
@@ -42,7 +43,9 @@ const createEvents = (
 const searchEvents = ({
   data,
   params,
+  context: { requestId },
 }: {
+  context: { requestId: string };
   data: Record<string, string[]>;
   params: Record<string, string | undefined>;
 }) => {
@@ -77,13 +80,13 @@ const searchEvents = ({
             home: e.home_team,
             uuid: v4(),
           }));
-        return createEvents(events, gameplanUuid).then(() => events);
+        return createEvents(events, gameplanUuid, requestId).then(() => events);
       });
   } else if (method === "create") {
     const home = data["home"][0];
     const away = data["away"][0];
     const events = [{ uuid: v4(), home, away, type: "Money Line" }];
-    return createEvents(events, gameplanUuid).then(() => events);
+    return createEvents(events, gameplanUuid, requestId).then(() => events);
   }
   throw new BadRequestResponse(`Unknown method: ${method}`);
 };
