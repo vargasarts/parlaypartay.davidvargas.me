@@ -1,21 +1,9 @@
 import { v4 } from "uuid";
 import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
 import { downloadFileContent } from "@dvargas92495/app/backend/downloadFile.server";
+import { createAlgorithmQuery } from "./createAlgorithm.server";
 
 const MAX_RETRIES = 10000;
-
-const getLogic = async (algorithm?: string) => {
-  try {
-    return algorithm
-      ? downloadFileContent({
-          Key: `data/algorithms/${algorithm}.js`,
-        })
-      : "return true";
-  } catch (e) {
-    console.error("Failed to get logic", e);
-    return "return true";
-  }
-};
 
 const createGameplanParlays = async ({
   data,
@@ -31,22 +19,15 @@ const createGameplanParlays = async ({
   const count = Number(data["count"][0]);
   const algorithm = data["algorithm"]?.[0];
   const uuid = params["uuid"] || "";
-  const customWeightsByEventUuid = Object.fromEntries(
-    Object.entries(data)
-      .filter(
-        ([k, v]) => k.startsWith("custom-") && Number(v) >= 0 && Number(v) <= 1
-      )
-      .map(([k, v]) => [k.replace(/^custom-/, ""), Number(v)])
-  );
   if (count < 1) {
     throw new Response(`Count must be at least 1. Found: ${count}`, {
       status: 400,
     });
   }
   const cxn = await getMysqlConnection(requestId);
-  const owner = await cxn
-    .execute("select user_id from gameplans where uuid = ?", [uuid])
-    .then(([a]) => (a as { user_id: string }[])?.[0]?.user_id);
+  const { user_id: owner, label } = await cxn
+    .execute("select user_id, label from gameplans where uuid = ?", [uuid])
+    .then(([a]) => (a as { user_id: string; label: string }[])?.[0]);
   const events = await cxn
     .execute("select uuid from events where gameplan_uuid = ?", [uuid])
     .then(([a]) => (a as { uuid: string }[]).map((a) => a.uuid));
@@ -64,7 +45,33 @@ const createGameplanParlays = async ({
     });
   }
 
-  const logic = await getLogic(algorithm);
+  const { logic, algorithmUuid } = await (algorithm === "custom"
+    ? Promise.resolve(
+        `const weights = ${JSON.stringify(
+          Object.fromEntries(
+            Object.entries(data)
+              .filter(
+                ([k, v]) =>
+                  k.startsWith("custom-") && Number(v) >= 0 && Number(v) <= 1
+              )
+              .map(([k, v]) => [k.replace(/^custom-/, ""), Number(v)])
+          ),
+          null,
+          4
+        )};
+return Math.random() < weights[event];`
+      ).then((logic) =>
+        createAlgorithmQuery({
+          logic,
+          userId,
+          label: `Custom for ${label} (${new Date().toLocaleString()})`,
+          cxn,
+          isCustom: true,
+        }).then((algorithmUuid) => ({ algorithmUuid, logic }))
+      )
+    : downloadFileContent({
+        Key: `data/algorithms/${algorithm}.js`,
+      }).then((logic) => ({ logic, algorithmUuid: algorithm })));
   let retries = 0;
   const existingParlays = new Set<number>();
   const results = Array(count)
@@ -72,8 +79,6 @@ const createGameplanParlays = async ({
     .map(() => {
       while (retries < MAX_RETRIES) {
         const outcomes = events.map((evt) => {
-          if (customWeightsByEventUuid[evt])
-            return Math.random() < customWeightsByEventUuid[evt];
           return new Function("event", logic)(evt) as boolean;
         });
 
@@ -103,6 +108,20 @@ const createGameplanParlays = async ({
       outcome,
     })),
   }));
+
+  await cxn.execute(
+    `DELETE pr FROM parlay_results pr 
+    INNER JOIN parlays p ON p.uuid = pr.parlay_uuid 
+    WHERE p.gameplan_uuid = ?`,
+    [uuid]
+  );
+
+  await cxn.execute(
+    `DELETE FROM parlays 
+    WHERE gameplan_uuid = ?`,
+    [uuid]
+  );
+
   await cxn.execute(
     `INSERT INTO parlays (uuid, attempt, gameplan_uuid) VALUES ${parlays
       .map(() => `(?,?,?)`)
@@ -118,6 +137,11 @@ const createGameplanParlays = async ({
       p.results.flatMap((r) => [r.uuid, r.eventUuid, p.uuid, Number(r.outcome)])
     )
   );
+
+  await cxn.execute(`UPDATE gameplans SET algorithm_uuid = ? WHERE uuid = ?`, [
+    algorithmUuid,
+    uuid,
+  ]);
 
   cxn.destroy();
 

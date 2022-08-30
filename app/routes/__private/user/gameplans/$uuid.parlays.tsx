@@ -3,7 +3,14 @@ import Table from "@dvargas92495/app/components/Table";
 import remixAppAction from "@dvargas92495/app/backend/remixAppAction.server";
 import type { ActionFunction, LoaderFunction } from "@remix-run/node";
 import setParlayResult from "~/data/setParlayResult.server";
-import { useNavigate, Outlet, Form, useLoaderData, Link } from "@remix-run/react";
+import {
+  useNavigate,
+  Outlet,
+  Form,
+  useLoaderData,
+  Link,
+  useMatches,
+} from "@remix-run/react";
 import getGameplanParlaysByUuid from "~/data/getGameplanParlaysByUuid.server";
 export { default as CatchBoundary } from "@dvargas92495/app/components/DefaultCatchBoundary";
 export { default as ErrorBoundary } from "@dvargas92495/app/components/DefaultErrorBoundary";
@@ -17,6 +24,7 @@ const Title = (data: GameplanData) => {
 const SingleGameplanPage = () => {
   const data = useLoaderData<GameplanData>();
   const nav = useNavigate();
+  const matches = useMatches();
   return (
     <>
       <h1 className="font-bold text-3xl mb-8">Parlays</h1>
@@ -26,7 +34,7 @@ const SingleGameplanPage = () => {
             onRowClick={(row) => nav(row.uuid as string)}
             className={"flex-grow"}
           />
-          <Link to={".."}>Edit</Link>
+          <Link to={matches[4].pathname.replace(/\/parlays$/, "")}>Edit</Link>
         </div>
         <Form method="put" className="flex-shrink-0">
           <h1 className={"mb-2"}>Event Results</h1>

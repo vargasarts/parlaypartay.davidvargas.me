@@ -3,7 +3,7 @@ import type mysql from "mysql2/promise";
 
 export const listAlgorithmsByUserQuery = (cxn: mysql.Connection, userId: string) =>
   cxn
-    .execute(`SELECT uuid, label FROM algorithms WHERE user_id = ?`, [userId])
+    .execute(`SELECT uuid, label FROM algorithms WHERE user_id = ? AND custom = 0`, [userId])
     .then(([records]) => {
       return {
         data: (records as { uuid: string; label: string }[]).map((r) => ({

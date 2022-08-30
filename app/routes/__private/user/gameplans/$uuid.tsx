@@ -1,7 +1,7 @@
 import NumberInput from "@dvargas92495/app/components/NumberInput";
 import Select from "@dvargas92495/app/components/Select";
 import Button from "@dvargas92495/app/components/Button";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData, Link, useMatches } from "@remix-run/react";
 import { ActionFunction, LoaderFunction, redirect } from "@remix-run/node";
 import remixAppAction from "@dvargas92495/app/backend/remixAppAction.server";
 import remixAppLoader from "@dvargas92495/app/backend/remixAppLoader.server";
@@ -42,7 +42,9 @@ const defaultEnd = addYears(now, 1);
 type GameplanData = Awaited<ReturnType<typeof getGameplanByUuid>>;
 const EditGameplanPage = () => {
   const data = useLoaderData<GameplanData>();
+  const [isCustom, setIsCustom] = useState(true);
   const [customValues, setCustomValues] = useState<Record<string, string>>({});
+  const matches = useMatches();
   return (
     <>
       <Form className="flex items-center gap-4" method="put">
@@ -87,20 +89,23 @@ const EditGameplanPage = () => {
                 {evt["away"]} {"@"} {evt.home}
               </span>
               <span className={"flex gap-2 items-center"}>
-                <NumberInput
-                  name={`custom-${evt.uuid}`}
-                  max={1}
-                  min={0}
-                  step={0.01}
-                  placeholder={"0.5"}
-                  className={"mb-0"}
-                  onChange={(e) =>
-                    setCustomValues({
-                      ...customValues,
-                      [`custom-${evt.uuid}`]: e.target.value,
-                    })
-                  }
-                />
+                {isCustom && (
+                  <NumberInput
+                    name={`custom-${evt.uuid}`}
+                    max={1}
+                    min={0}
+                    step={0.01}
+                    placeholder={"0.5"}
+                    className={"mb-0"}
+                    onChange={(e) =>
+                      setCustomValues({
+                        ...customValues,
+                        [`custom-${evt.uuid}`]: e.target.value,
+                      })
+                    }
+                    defaultValue={data.customValues?.[evt.uuid]}
+                  />
+                )}
                 <button
                   className="py-2 px-4 bg-red-700 text-white cursor-pointer rounded-md text-sm"
                   name={"uuid"}
@@ -119,7 +124,9 @@ const EditGameplanPage = () => {
           <Select
             label="Algorithm"
             name="algorithm"
-            options={data.algorithms?.data}
+            options={data.algorithms}
+            defaultValue={data.algorithmUuid || data.algorithms[0].id}
+            onChange={(e) => setIsCustom(e === "custom")}
           />
           <NumberInput
             label="Count"
@@ -129,6 +136,12 @@ const EditGameplanPage = () => {
             min={1}
           />
           <Button>Generate</Button>
+          <Link
+            to={`${matches[4].pathname}/parlays`}
+            className={"bg-green-200 rounded-full py-2 px-3 cursor-pointer"}
+          >
+            View Current Parlays
+          </Link>
         </Form>
       </div>
     </>

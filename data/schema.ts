@@ -2,8 +2,9 @@ import { z } from "zod";
 
 const algorithm = z.object({
   uuid: z.string().uuid().describe("primary"),
-  label: z.string().max(64).describe("unique"),
+  label: z.string().max(128).describe("unique"),
   userId: z.string().max(32).describe("unique"),
+  custom: z.boolean(),
 });
 
 const eventProperty = z.object({
@@ -24,6 +25,7 @@ const gameplan = z.object({
   uuid: z.string().uuid().describe("primary"),
   label: z.string().max(64).describe("unique"),
   userId: z.string().max(32).describe("unique"),
+  algorithmUuid: z.string().uuid().optional().describe("foreign"),
 });
 
 const parlayResult = z.object({
