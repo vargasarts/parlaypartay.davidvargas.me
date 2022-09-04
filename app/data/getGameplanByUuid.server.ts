@@ -2,7 +2,7 @@ import { downloadFileContent } from "@dvargas92495/app/backend/downloadFile.serv
 import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
 import { listAlgorithmsByUserQuery } from "./listAlgorithmsByUser.server";
 
-const getAlgorithmByUuid = ({
+const getGameplanByUuid = ({
   userId,
   params,
   context: { requestId },
@@ -34,27 +34,48 @@ const getAlgorithmByUuid = ({
         }),
       cxn
         .execute(
-          `SELECT e.uuid, p.label, p.value FROM events e INNER JOIN event_properties p ON p.event_uuid = e.uuid WHERE gameplan_uuid = ?`,
+          `SELECT e.uuid, p.label, p.value, e.position 
+          FROM events e 
+          INNER JOIN event_properties p ON p.event_uuid = e.uuid 
+          WHERE gameplan_uuid = ?`,
           [uuid]
         )
         .then(([records]) => {
-          return (
-            records as { label: string; uuid: string; value: string }[]
-          ).reduce((p, c) => {
-            if (p[c.uuid]) {
-              p[c.uuid][c.label] = c.value;
-            } else {
-              p[c.uuid] = { [c.label]: c.value };
-            }
-            return p;
-          }, {} as Record<string, Record<string, string>>);
+          const events = records as {
+            label: string;
+            uuid: string;
+            value: string;
+            position: number;
+          }[];
+          return {
+            properties: events.reduce((p, c) => {
+              if (p[c.uuid]) {
+                p[c.uuid][c.label] = c.value;
+              } else {
+                p[c.uuid] = { [c.label]: c.value };
+              }
+              return p;
+            }, {} as Record<string, Record<string, string>>),
+            positions: Object.entries(
+              Object.fromEntries(events.map((e) => [e.uuid, e.position]))
+            )
+              .sort((a, b) => a[1] - b[1])
+              .map((a) => a[0]),
+          };
         }),
       listAlgorithmsByUserQuery(cxn, userId),
+      cxn
+        .execute(
+          `SELECT COUNT(uuid) as count FROM parlays WHERE gameplan_uuid = ?`,
+          [uuid]
+        )
+        .then(([a]) => (a as { count: number }[])[0].count),
     ]).then(
       async ([
         { label, algorithm_uuid, algorithm, custom },
         events,
         algorithms,
+        parlayCount,
       ]) => {
         cxn.destroy();
         const customValues = custom
@@ -73,15 +94,17 @@ const getAlgorithmByUuid = ({
               ? { id: algorithm_uuid, label: algorithm }
               : { id: "custom", label: "Custom" },
           ].concat(algorithms.data),
-          events: Object.entries(events).map(([uuid, rest]) => ({
+          events: events.positions.map((uuid) => ({
             uuid,
-            home: rest["home"],
-            away: rest["away"],
+            home: events.properties[uuid]["home"],
+            away: events.properties[uuid]["away"],
+            date: events.properties[uuid]["date"],
           })),
+          hasParlays: parlayCount > 0,
         };
       }
     )
   );
 };
 
-export default getAlgorithmByUuid;
+export default getGameplanByUuid;

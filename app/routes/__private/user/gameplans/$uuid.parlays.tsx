@@ -38,44 +38,40 @@ const SingleGameplanPage = () => {
         </div>
         <Form method="put" className="flex-shrink-0">
           <h1 className={"mb-2"}>Event Results</h1>
-          {Object.keys(data.events)
-            .sort((a, b) => a.localeCompare(b))
-            .map((k) => (
-              <div key={k} className={"mb-2 cursor-pointer"}>
-                <button
-                  name={k}
-                  value={"false"}
-                  className={
-                    data.events[k].outcome === false
-                      ? "bg-sky-500 border-none p-2 rounded-sm w-24"
-                      : "border-sky-500 border bg-none p-2 rounded-sm w-24"
-                  }
-                >
-                  {data.events[k].properties.away}
-                </button>
-                {" @ "}
-                <button
-                  name={k}
-                  value={"true"}
-                  className={
-                    data.events[k].outcome === true
-                      ? "bg-sky-500 border-none p-2 rounded-sm w-24"
-                      : "border-sky-500 border bg-none p-2 rounded-sm w-24"
-                  }
-                >
-                  {data.events[k].properties.home}
-                </button>
-                <button
-                  name={k}
-                  value={"reset"}
-                  className={
-                    "border-sky-500 border bg-none p-2 rounded-sm ml-8"
-                  }
-                >
-                  reset
-                </button>
-              </div>
-            ))}
+          {data.events.map((k) => (
+            <div key={k.uuid} className={"mb-2 cursor-pointer"}>
+              <button
+                name={k.uuid}
+                value={"false"}
+                className={
+                  k.outcome === false
+                    ? "bg-sky-500 border-none p-2 rounded-sm w-24"
+                    : "border-sky-500 border bg-none p-2 rounded-sm w-24"
+                }
+              >
+                {k.properties.away}
+              </button>
+              {" @ "}
+              <button
+                name={k.uuid}
+                value={"true"}
+                className={
+                  k.outcome === true
+                    ? "bg-sky-500 border-none p-2 rounded-sm w-24"
+                    : "border-sky-500 border bg-none p-2 rounded-sm w-24"
+                }
+              >
+                {k.properties.home}
+              </button>
+              <button
+                name={k.uuid}
+                value={"reset"}
+                className={"border-sky-500 border bg-none p-2 rounded-sm ml-8"}
+              >
+                reset
+              </button>
+            </div>
+          ))}
         </Form>
         <Outlet />
       </div>

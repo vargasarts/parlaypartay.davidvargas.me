@@ -19,6 +19,7 @@ const event = z.object({
   type: z.number().max(Math.pow(2, 8)),
   gameplanUuid: z.string().uuid().describe("foreign"),
   outcome: z.boolean().optional(),
+  position: z.number(),
 });
 
 const gameplan = z.object({

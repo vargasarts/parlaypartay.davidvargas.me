@@ -27,7 +27,7 @@ const getGameplanParlaysByUuid = async ({
     );
   const events = await cxn
     .execute(
-      `SELECT e.uuid, e.outcome, ep.label, ep.value from events e
+      `SELECT e.uuid, e.outcome, ep.label, ep.value, e.position from events e
     INNER JOIN event_properties ep ON ep.event_uuid = e.uuid 
     WHERE e.gameplan_uuid = ?`,
       [uuid]
@@ -39,6 +39,7 @@ const getGameplanParlaysByUuid = async ({
           outcome: 0 | 1 | null;
           label: string;
           value: string;
+          position: number;
         }[]
     );
   const title = await cxn
@@ -74,10 +75,11 @@ const getGameplanParlaysByUuid = async ({
       p[c.uuid] = {
         properties: { [c.label]: c.value },
         outcome: c.outcome === null ? undefined : Boolean(c.outcome),
+        position: c.position,
       };
     }
     return p;
-  }, {} as Record<string, { properties: Record<string, string>; outcome: boolean | undefined }>);
+  }, {} as Record<string, { properties: Record<string, string>; outcome: boolean | undefined; position: number }>);
   const eventOutcomes = Object.fromEntries(
     events.map((e) => [e.uuid, e.outcome])
   );
@@ -99,14 +101,22 @@ const getGameplanParlaysByUuid = async ({
         left: Object.keys(rest.results).filter((r) => eventOutcomes[r] === null)
           .length,
       }))
-      .sort((a, b) => b.correct - a.correct),
+      .sort((a, b) =>
+        b.correct === a.correct ? a.attempt - b.attempt : b.correct - a.correct
+      ),
     columns: [
       { Header: "Attempt", accessor: "attempt" },
       { Header: "Correct", accessor: "correct" },
       { Header: "Wrong", accessor: "wrong" },
       { Header: "Left", accessor: "left" },
     ],
-    events: groupedEvents,
+    events: Object.entries(groupedEvents)
+      .sort((a, b) => a[1].position - b[1].position)
+      .map(([uuid, { properties, outcome }]) => ({
+        uuid,
+        properties,
+        outcome,
+      })),
     title,
   };
 };

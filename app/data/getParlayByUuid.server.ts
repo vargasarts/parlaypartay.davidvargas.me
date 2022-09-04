@@ -10,7 +10,7 @@ const getParlayByUuid = async ({
   const cxn = await getMysqlConnection(requestId);
   const results = await cxn
     .execute(
-      `SELECT p.attempt, pr.outcome, e.type, e.uuid, ep.label, ep.value, e.outcome as eoutcome FROM parlays p 
+      `SELECT p.attempt, pr.outcome, e.type, e.uuid, ep.label, ep.value, e.outcome as eoutcome, e.position FROM parlays p 
     INNER JOIN parlay_results pr ON pr.parlay_uuid = p.uuid 
     INNER JOIN events e ON pr.event_uuid = e.uuid 
     INNER JOIN event_properties ep ON ep.event_uuid = e.uuid 
@@ -27,6 +27,7 @@ const getParlayByUuid = async ({
           value: string;
           attempt: string;
           eoutcome: boolean | null;
+          position: number;
         }[]
     );
   cxn.destroy();
@@ -43,7 +44,15 @@ const getParlayByUuid = async ({
     }
     return p;
   }, {} as Record<string, { properties: Record<string, string>; type: number; prediction: boolean; outcome: boolean | null }>);
-  return { events, attempt: results[0].attempt };
+  const positions = Object.entries(
+    Object.fromEntries(results.map((e) => [e.uuid, e.position]))
+  )
+    .sort((a, b) => a[1] - b[1])
+    .map((a) => a[0]);
+  return {
+    events: positions.map((uuid) => ({ uuid, ...events[uuid] })),
+    attempt: results[0].attempt,
+  };
 };
 
 export default getParlayByUuid;
