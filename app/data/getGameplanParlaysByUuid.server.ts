@@ -52,9 +52,9 @@ const getGameplanParlaysByUuid = async ({
       ([p]) =>
         (
           p as {
-            title: string;
+            label: string;
           }[]
-        )[0]?.title
+        )[0]?.label
     );
   cxn.destroy();
   const grouped = parlays.reduce((p, c) => {
