@@ -89,11 +89,12 @@ const getGameplanByUuid = ({
           customValues,
           label,
           algorithmUuid: algorithm_uuid,
-          algorithms: [
-            algorithm
-              ? { id: algorithm_uuid, label: algorithm }
-              : { id: "custom", label: "Custom" },
-          ].concat(algorithms.data),
+          algorithms: (custom && algorithm
+            ? [{ id: algorithm_uuid, label: algorithm }]
+            : []
+          )
+            .concat({ id: "custom", label: "Custom" })
+            .concat(algorithms.data),
           events: events.positions.map((uuid) => ({
             uuid,
             home: events.properties[uuid]["home"],
