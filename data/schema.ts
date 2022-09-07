@@ -38,7 +38,7 @@ const parlayResult = z.object({
 
 const parlay = z.object({
   uuid: z.string().uuid().describe("primary"),
-  attempt: z.boolean(),
+  attempt: z.number(),
   gameplanUuid: z.string().uuid().describe("foreign"),
 });
 
