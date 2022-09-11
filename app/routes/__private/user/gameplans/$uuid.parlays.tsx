@@ -43,6 +43,7 @@ const SingleGameplanPage = () => {
   return (
     <>
       <h1 className="font-bold text-3xl mb-8">Parlays</h1>
+      <p className="mb-2">{data.data.filter((d) => !d.wrong).length} Left</p>
       <div className="w-full flex gap-16">
         <div className="max-w-4xl flex flex-col">
           <Table

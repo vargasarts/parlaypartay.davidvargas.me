@@ -151,7 +151,12 @@ const EditGameplanPage = () => {
               >
                 {evt.away} {"@"} {evt.home}{" "}
                 <span className="italic text-xs opacity-75 ml-2">
-                  ({dateFnsFormat(new Date(evt.date), "MM/dd hh:mm")})
+                  (
+                  {dateFnsFormat(
+                    evt.date ? new Date(evt.date) : new Date(),
+                    "MM/dd hh:mm"
+                  )}
+                  )
                 </span>
               </span>
               <span className={"flex gap-2 items-center"}>
