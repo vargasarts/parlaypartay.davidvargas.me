@@ -77,6 +77,7 @@ const EditGameplanPage = () => {
                 name={"date"}
                 type={"datetime-local"}
                 className={"flex-1"}
+                defaultValue={dateFnsFormat(now, "yyyy-MM-dd")}
               />
               <Button name={"method"} value={"create"} className={"w-40"}>
                 Add Game
@@ -190,33 +191,54 @@ const EditGameplanPage = () => {
             </div>
           ))}
         </div>
-        <Form method={"post"} className="flex gap-8 w-full items-center">
+        <Form method={"post"} className="flex gap-8 flex-col">
           {Object.entries(customValues).map((cv) => (
             <input type={"hidden"} name={cv[0]} value={cv[1]} key={cv[0]} />
           ))}
-          <Select
-            label="Algorithm"
-            name="algorithm"
-            options={data.algorithms}
-            defaultValue={data.algorithmUuid || data.algorithms[0].id}
-            onChange={(e) => setIsCustom(e === "custom")}
-          />
-          <NumberInput
-            label="Count"
-            name="count"
-            placeholder="0"
-            max={Math.pow(2, (data.events || []).length)}
-            min={1}
-          />
-          <Button>Generate</Button>
-          {data.hasParlays && (
-            <Link
-              to={`${matches[4].pathname}/parlays`}
-              className={"bg-green-200 rounded-full py-2 px-3 cursor-pointer"}
-            >
-              View Current Parlays
-            </Link>
-          )}
+          <div className="flex gap-8 w-full items-center">
+            <Select
+              label="Algorithm"
+              name="algorithm"
+              options={data.algorithms}
+              defaultValue={data.algorithmUuid || data.algorithms[0].id}
+              onChange={(e) => setIsCustom(e === "custom")}
+            />
+            <NumberInput
+              label="Count"
+              name="count"
+              placeholder="0"
+              max={Math.pow(2, (data.events || []).length)}
+              min={1}
+              defaultValue={1}
+            />
+            <NumberInput
+              label="Maximum Upsets"
+              name="max-upsets"
+              placeholder="0"
+              max={data.events.length}
+              min={0}
+              defaultValue={data.events.length}
+            />
+            <NumberInput
+              label="Minimum Upsets"
+              name="min-upsets"
+              placeholder="0"
+              max={data.events.length}
+              min={0}
+              defaultValue={0}
+            />
+          </div>
+          <div className="flex gap-8 w-full items-center">
+            <Button>Generate</Button>
+            {data.hasParlays && (
+              <Link
+                to={`${matches[4].pathname}/parlays`}
+                className={"bg-green-200 rounded-full py-2 px-3 cursor-pointer"}
+              >
+                View Current Parlays
+              </Link>
+            )}
+          </div>
         </Form>
       </div>
     </>

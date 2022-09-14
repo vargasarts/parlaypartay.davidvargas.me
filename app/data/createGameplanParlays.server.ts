@@ -4,6 +4,10 @@ import { downloadFileContent } from "@dvargas92495/app/backend/downloadFile.serv
 import { createAlgorithmQuery } from "./createAlgorithm.server";
 
 const MAX_RETRIES = 10000;
+const fact = (index: number) =>
+  Array(index)
+    .fill(null)
+    .reduce((p, _, i) => p * (i + 1), 1);
 
 const createGameplanParlays = async ({
   data,
@@ -31,7 +35,26 @@ const createGameplanParlays = async ({
   const events = await cxn
     .execute("select uuid from events where gameplan_uuid = ?", [uuid])
     .then(([a]) => (a as { uuid: string }[]).map((a) => a.uuid));
-  const max = Math.pow(2, events.length);
+  const minUpsets = Number(data["min-upsets"]?.[0]) || 1;
+  const maxUpsets = Number(data["max-upsets"]?.[0]) || events.length;
+  if (maxUpsets <= minUpsets) {
+    cxn.destroy();
+    throw new Response(
+      `Max upsets must be greater than min upsets. Found: max ${maxUpsets}, min ${minUpsets}`,
+      {
+        status: 400,
+      }
+    );
+  }
+  const max = Array(maxUpsets - minUpsets)
+    .fill(null)
+    .reduce(
+      (p, _, i) =>
+        p +
+        fact(events.length) /
+          (fact(i + minUpsets) * fact(events.length - i - minUpsets)),
+      0
+    );
   if (count > max) {
     cxn.destroy();
     throw new Response(`Count must be at most ${max}. Found: ${count}`, {
@@ -45,7 +68,7 @@ const createGameplanParlays = async ({
     });
   }
 
-  const { logic, algorithmUuid } = await (algorithm === "custom"
+  const { logic, algorithmUuid, upsets } = await (algorithm === "custom"
     ? Promise.resolve(
         `const weights = ${JSON.stringify(
           Object.fromEntries(
@@ -67,11 +90,19 @@ return Math.random() < weights[event];`
           label: `Custom for ${label} (${new Date().toLocaleString()})`,
           cxn,
           isCustom: true,
-        }).then((algorithmUuid) => ({ algorithmUuid, logic }))
+        }).then((algorithmUuid) => ({
+          algorithmUuid,
+          logic,
+          upsets: (uuid: string) => Number(data[`custom-${uuid}`]) < 0.5,
+        }))
       )
     : downloadFileContent({
         Key: `data/algorithms/${algorithm}.js`,
-      }).then((logic) => ({ logic, algorithmUuid: algorithm })));
+      }).then((logic) => ({
+        logic,
+        algorithmUuid: algorithm,
+        upsets: () => false,
+      })));
   let retries = 0;
   const existingParlays = new Set<number>();
   const results = Array(count)
@@ -89,7 +120,10 @@ return Math.random() < weights[event];`
 
         if (!existingParlays.has(parlay)) {
           existingParlays.add(parlay);
-          return outcomes;
+          const numUpsets = events.filter((e, i) => upsets(e) === outcomes[i]).length;
+          if (numUpsets <= maxUpsets && numUpsets >= minUpsets) {
+            return outcomes;
+          }
         }
         retries++;
       }
