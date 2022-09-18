@@ -96,13 +96,22 @@ return Math.random() < weights[event];`
           upsets: (uuid: string) => Number(data[`custom-${uuid}`]) < 0.5,
         }))
       )
-    : downloadFileContent({
-        Key: `data/algorithms/${algorithm}.js`,
-      }).then((logic) => ({
-        logic,
-        algorithmUuid: algorithm,
-        upsets: () => false,
-      })));
+    : // no longer allowing arbitrary user algorithms 
+      await cxn
+        .execute("select custom from algoritms where where = ?", [algorithm])
+        .then(([a]) => (a as { custom: 0 | 1 }[]).map((a) => a.custom))
+        .then((al) =>
+          al[0]
+            ? downloadFileContent({
+                Key: `data/algorithms/${algorithm}.js`,
+              })
+            : `return false`
+        )
+        .then((logic) => ({
+          logic,
+          algorithmUuid: algorithm,
+          upsets: () => false,
+        })));
   let retries = 0;
   const existingParlays = new Set<number>();
   const results = Array(count)
@@ -120,7 +129,9 @@ return Math.random() < weights[event];`
 
         if (!existingParlays.has(parlay)) {
           existingParlays.add(parlay);
-          const numUpsets = events.filter((e, i) => upsets(e) === outcomes[i]).length;
+          const numUpsets = events.filter(
+            (e, i) => upsets(e) === outcomes[i]
+          ).length;
           if (numUpsets <= maxUpsets && numUpsets >= minUpsets) {
             return outcomes;
           }
