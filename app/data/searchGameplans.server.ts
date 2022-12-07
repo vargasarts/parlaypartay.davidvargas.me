@@ -18,8 +18,12 @@ const searchGameplans = ({
       const size = searchParams["size"] || "10";
       const index = searchParams["index"] || "0";
       const whereValues = keys
-        .map((k) => searchParams[k])
-        .concat([Number(index) * Number(size), size].map((n) => n.toString()));
+        .map((k) => searchParams[k] as string | number)
+        .concat(
+          [Number(index) * Number(size), size].map((n) =>
+            process.env.NODE_ENV === "development" ? n.toString() : n
+          )
+        );
       return verifyAdminUser(userId)
         .then((isAdmin) =>
           isAdmin
@@ -48,7 +52,7 @@ const searchGameplans = ({
             .map((k) => `${k} = ?`)
             .join(" AND ")}
           LIMIT ?, ?`,
-                  [userId].concat(whereValues)
+                  [userId as string | number].concat(whereValues)
                 ),
                 con.execute(
                   `SELECT COUNT(uuid) as count
