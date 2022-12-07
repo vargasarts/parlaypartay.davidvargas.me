@@ -1,9 +1,15 @@
-import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
+import getMysqlConnection from "fuegojs/utils/mysql";
 import type mysql from "mysql2/promise";
 
-export const listAlgorithmsByUserQuery = (cxn: mysql.Connection, userId: string) =>
+export const listAlgorithmsByUserQuery = (
+  cxn: mysql.Connection,
+  userId: string
+) =>
   cxn
-    .execute(`SELECT uuid, label FROM algorithms WHERE user_id = ? AND custom = 0`, [userId])
+    .execute(
+      `SELECT uuid, label FROM algorithms WHERE user_id = ? AND custom = 0`,
+      [userId]
+    )
     .then(([records]) => {
       return {
         data: (records as { uuid: string; label: string }[]).map((r) => ({

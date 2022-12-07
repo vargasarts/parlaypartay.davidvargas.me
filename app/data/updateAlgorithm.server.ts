@@ -1,4 +1,4 @@
-import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
+import getMysqlConnection from "fuegojs/utils/mysql";
 import { MethodNotAllowedResponse } from "@dvargas92495/app/backend/responses.server";
 import uploadFile from "@dvargas92495/app/backend/uploadFile.server";
 import type mysql from "mysql2/promise";

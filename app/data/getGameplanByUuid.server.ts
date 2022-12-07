@@ -1,5 +1,5 @@
 import { downloadFileContent } from "@dvargas92495/app/backend/downloadFile.server";
-import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
+import getMysqlConnection from "fuegojs/utils/mysql";
 import { listAlgorithmsByUserQuery } from "./listAlgorithmsByUser.server";
 
 const getGameplanByUuid = ({

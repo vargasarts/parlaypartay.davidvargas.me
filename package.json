@@ -20,7 +20,8 @@
   "dependencies": {
     "@dvargas92495/app": "^0.13.7",
     "cdktf-cli": "^0.12.1",
-    "file-saver": "^2.0.5"
+    "file-saver": "^2.0.5",
+    "fuegojs": "^0.40.0"
   },
   "devDependencies": {
     "@types/file-saver": "^2.0.5"

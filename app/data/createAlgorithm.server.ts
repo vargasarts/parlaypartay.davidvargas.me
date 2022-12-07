@@ -1,4 +1,4 @@
-import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
+import getMysqlConnection from "fuegojs/utils/mysql";
 import { v4 } from "uuid";
 import uploadFile from "@dvargas92495/app/backend/uploadFile.server";
 import type mysql from "mysql2/promise";
@@ -14,16 +14,14 @@ export const createAlgorithmQuery = ({
   logic: string;
   userId: string;
   cxn: mysql.Connection;
-  isCustom?: boolean,
+  isCustom?: boolean;
 }) => {
   const uuid = v4();
   return cxn
-    .execute(`INSERT INTO algorithms (uuid, label, user_id, custom) VALUES (?,?,?,?)`, [
-      uuid,
-      label,
-      userId,
-      isCustom,
-    ])
+    .execute(
+      `INSERT INTO algorithms (uuid, label, user_id, custom) VALUES (?,?,?,?)`,
+      [uuid, label, userId, isCustom]
+    )
     .then(() => {
       uploadFile({ Key: `data/algorithms/${uuid}.js`, Body: logic });
     })

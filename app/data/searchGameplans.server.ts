@@ -1,4 +1,4 @@
-import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
+import getMysqlConnection from "fuegojs/utils/mysql";
 import verifyAdminUser from "~/data/verifyAdminUser.server";
 
 const searchGameplans = ({

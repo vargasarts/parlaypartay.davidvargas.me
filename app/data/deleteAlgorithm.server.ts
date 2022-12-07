@@ -1,4 +1,4 @@
-import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
+import getMysqlConnection from "fuegojs/utils/mysql";
 import { MethodNotAllowedResponse } from "@dvargas92495/app/backend/responses.server";
 import removeFile from "@dvargas92495/app/backend/removeFile.server";
 import fs from "fs";
@@ -15,7 +15,8 @@ const deleteAlgorithm = ({
   const uuid = params["uuid"] || "";
   return getMysqlConnection(requestId)
     .then((cxn) =>
-      cxn.execute(`SELECT user_id FROM algorithms WHERE uuid = ?`, [uuid])
+      cxn
+        .execute(`SELECT user_id FROM algorithms WHERE uuid = ?`, [uuid])
         .then(([records]) => {
           return (records as { user_id: string }[])[0]?.user_id;
         })
@@ -26,9 +27,10 @@ const deleteAlgorithm = ({
             );
           }
 
-          return (fs.existsSync(`data/algorithms/${uuid}.js`)
-            ? removeFile({ Key: `data/algorithms/${uuid}.js` })
-            : Promise.resolve()
+          return (
+            fs.existsSync(`data/algorithms/${uuid}.js`)
+              ? removeFile({ Key: `data/algorithms/${uuid}.js` })
+              : Promise.resolve()
           )
             .then(() =>
               cxn.execute(`DELETE FROM algorithms WHERE uuid = ?`, [uuid])

@@ -1,4 +1,4 @@
-import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
+import getMysqlConnection from "fuegojs/utils/mysql";
 import { v4 } from "uuid";
 
 const createGameplan = ({
@@ -14,10 +14,12 @@ const createGameplan = ({
   const uuid = v4();
   return getMysqlConnection(requestId)
     .then((cxn) => {
-      return cxn.execute(
-        `INSERT INTO gameplans (uuid, label, user_id) VALUES (?,?,?)`,
-        [uuid, label, userId]
-      ).then(() => cxn.destroy());
+      return cxn
+        .execute(
+          `INSERT INTO gameplans (uuid, label, user_id) VALUES (?,?,?)`,
+          [uuid, label, userId]
+        )
+        .then(() => cxn.destroy());
     })
     .then(() => uuid);
 };

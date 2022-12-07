@@ -1,5 +1,5 @@
 import { v4 } from "uuid";
-import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
+import getMysqlConnection from "fuegojs/utils/mysql";
 import { downloadFileContent } from "@dvargas92495/app/backend/downloadFile.server";
 import { createAlgorithmQuery } from "./createAlgorithm.server";
 
@@ -96,7 +96,7 @@ return Math.random() < weights[event];`
           upsets: (uuid: string) => Number(data[`custom-${uuid}`]) < 0.5,
         }))
       )
-    : // no longer allowing arbitrary user algorithms 
+    : // no longer allowing arbitrary user algorithms
       await cxn
         .execute("select custom from algoritms where where = ?", [algorithm])
         .then(([a]) => (a as { custom: 0 | 1 }[]).map((a) => a.custom))

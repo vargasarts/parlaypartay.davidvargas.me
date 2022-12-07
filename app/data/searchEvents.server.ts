@@ -1,7 +1,7 @@
 import axios from "axios";
 import dateParse from "date-fns/parse";
 import isBefore from "date-fns/isBefore";
-import getMysqlConnection from "@dvargas92495/app/backend/mysql.server";
+import getMysqlConnection from "fuegojs/utils/mysql";
 import { v4 } from "uuid";
 import {
   BadRequestResponse,
