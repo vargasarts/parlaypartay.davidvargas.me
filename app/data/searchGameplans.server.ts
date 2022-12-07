@@ -20,7 +20,7 @@ const searchGameplans = ({
       const whereValues = keys
         .map((k) => searchParams[k] as string | number)
         .concat(
-          [Number(index) * Number(size), size].map((n) =>
+          [size, Number(index) * Number(size)].map((n) =>
             process.env.NODE_ENV === "development" ? n.toString() : n
           )
         );
@@ -51,7 +51,7 @@ const searchGameplans = ({
             .concat(keys)
             .map((k) => `${k} = ?`)
             .join(" AND ")}
-          LIMIT ?, ?`,
+          LIMIT ? OFFSET ?`,
                   [userId as string | number].concat(whereValues)
                 ),
                 con.execute(
