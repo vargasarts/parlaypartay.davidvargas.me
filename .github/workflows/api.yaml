@@ -12,7 +12,7 @@ env:
   AWS_SECRET_ACCESS_KEY: ${{ secrets.LAMBDA_AWS_ACCESS_SECRET }}
   AWS_REGION: us-east-1
   CLERK_API_KEY: ${{ secrets.CLERK_API_KEY }}
-  DATABASE_URL: mysql://parlaypartay_davidvargas_me:${{ secrets.MYSQL_PASSWORD }}@vargas-arts.c2sjnb5f4d57.us-east-1.rds.amazonaws.com:5432/parlaypartay_davidvargas_me
+  DATABASE_URL: ${{ secrets.DATABASE_URL }}
   IS_PRODUCTION: 1
   ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
   ORIGIN: https://parlaypartay.davidvargas.me
