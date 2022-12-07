@@ -20,7 +20,7 @@ const searchGameplans = ({
       const whereValues = keys
         .map((k) => searchParams[k] as string | number)
         .concat(
-          [size, Number(index) * Number(size)].map((n) =>
+          [Number(size), Number(index) * Number(size)].map((n) =>
             process.env.NODE_ENV === "development" ? n.toString() : n
           )
         );
